@@ -1,0 +1,120 @@
+
+logging.level.: ${LOGGING_LEVEL_:INFO}
+logging:
+  file: ${LOGGING_FILE:config-server}.log
+  path: ${LOGGING_PATH:${user.home}/.data/config-server/logs}
+  level:
+    jndi: ${LOGGING_LEVEL_:INFO}
+    org.springframework.amqp: ${LOGGING_LEVEL_:INFO}
+    org.springframework.beans.factory.annotation.InjectionMetadata: ${LOGGING_LEVEL_:INFO}
+    org.springframework.beans.factory.support.DefaultListableBeanFactory: ${LOGGING_LEVEL_:INFO}
+    org.springframework.core.env.MutablePropertySources: ${LOGGING_LEVEL_:INFO}
+    org.springframework.core.env.PropertySourcesPropertyResolver: ${LOGGING_LEVEL_:INFO}
+    org.springframework.jndi: ${LOGGING_LEVEL_:INFO}
+    org.springframework.core.type.classreading.AnnotationAttributesReadingVisitor: INFO
+    org.springframework.web.context.support.StandardServletEnvironment: ${LOGGING_LEVEL_:INFO}
+    org.springframework.security: ${LOGGING_LEVEL_:INFO}
+
+management:
+  #port:
+  context-path: ${MANAGEMENT_CONTEXTPATH:/manage}
+  security:
+    enabled: true
+    roles: ADMIN # no ROLE_ prefix here
+
+endpoints.health.sensitive: true
+
+security:
+  basic.enabled: ${SECURITY_BASIC_ENABLED:true}
+  user:
+    name: ${SECURITY_USER_NAME:admin}
+    password: ${SECURITY_USER_PASSWORD:admin_pass}
+  hook:
+    name: ${SECURITY_HOOK_NAME:hook}
+    password: ${SECURITY_HOOK_PASSWORD:hook_pass}
+
+server:
+  context-path: /
+  port: ${SERVER_PORT:8888}
+
+eureka:
+  instance:
+    health-check-url-path: ${endpoints.health.path:/health}
+    # eureka.instance.hostname affect Status->instances's url href (not text) value on dashboard
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:config-server.local}
+    # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
+    instance-id: ${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${spring.application.name}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}
+    lease-renewal-interval-in-seconds: 10
+    metadataMap:
+      configPath: ${spring.cloud.config.server.prefix}
+    non-secure-port: ${EUREKA_INSTANCE_NONSECUREPORT:8888}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    status-page-url-path: ${endpoints.info.path:/info}
+    # Registering a Secure Application
+    #health-check-url: https://${eureka.instance.hostname}/
+    #status-page-url: https://${eureka.instance.hostname}/
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka.local:8761/eureka/}
+
+spring.cloud:
+  client.hostname: ${SPRING_CLOUD_CLIENT_HOSTNAME:config-server.local}
+  config:
+    # see: org.springframework.cloud.config.monitor.PropertyPathEndpoint
+    monitor.endpoint.path: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_ENDPOINT_PATH:/config}
+    server:
+      default-application-name: application
+      default-label: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL:master}
+      default-profile: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE:default}
+      encrypt.enabled: true
+      health.repositories: # default is 'app'
+        health-check-repository:
+          name: health-check
+      git:
+        delete-untracked-branches: true
+        deploy-key: # custom property
+          private: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY:classpath:default_deploy_key}
+          public: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY:classpath:default_deploy_key.pub}
+        force-pull: true
+        parent-support-enabled: true
+        timeout: 10
+        #uri: ${GIT_PREFIX:ssh://git@gitlab.local:20022/spring-cloud-config-server}/{application}-config.git
+        uri: ${GIT_PREFIX:https://github.com/spring-cloud-config-server}/{application}-config.git
+      # see: org.springframework.cloud.config.monitor.EnvironmentMonitorAutoConfiguration
+      monitor:
+        bitbucket.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED:false}
+        github.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITHUB_ENABLED:false}
+        gitlab.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLAB_ENABLED:false}
+        gitlabrepo.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED:false}
+      prefix: /config
+
+#spring:
+#  rabbitmq:
+#    host: ${SPRING_RABBITMQ_HOST:cloudbus.local}
+#    port: ${SPRING_RABBITMQ_PORT:5672}
+#    username: ${SPRING_RABBITMQ_USERNAME:user}
+#    password: ${SPRING_RABBITMQ_PASSWORD:user_pass}
+
+---
+spring:
+  profiles: default
+
+---
+spring:
+  profiles: development.env
+
+---
+spring:
+  profiles: ut.env
+
+---
+spring:
+  profiles: it.env
+
+---
+spring:
+  profiles: staging.env
+
+---
+spring:
+  profiles: production.env

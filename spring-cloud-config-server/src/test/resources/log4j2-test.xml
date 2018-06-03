@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+    </Properties>
+
+    <Appenders>
+        <Console name="STDOUT">
+            <PatternLayout charset="UTF-8" >
+                <pattern>%d{ISO8601}{GMT+8} %highlight{%p} %style{%c{1.} [%t] %m}{bold,green}%n</pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="${env:LOGGING_LEVEL_:-INFO}" includeLocation="false">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>

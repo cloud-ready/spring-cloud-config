@@ -1,0 +1,17 @@
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:config-server}
+  cloud:
+    config:
+      enabled: false
+
+# see: org.springframework.cloud.config.server.config.EncryptionAutoConfiguration
+encrypt:
+  failOnError: false
+  #key: changeme # symmetric encryption
+  key-store: # asymmetric encryption
+    alias: ${ENCRYPT_KEYSTORE_ALIAS:key_alias}
+    secret: ${ENCRYPT_KEYSTORE_SECRET:key_pass}
+    password: ${ENCRYPT_KEYSTORE_PASSWORD:store_pass}
+    location: ${ENCRYPT_KEYSTORE_LOCATION:classpath:keystore.jks}
