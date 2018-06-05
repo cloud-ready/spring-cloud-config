@@ -1,4 +1,4 @@
-package ai.advance.cloud.config.server.security;
+package cn.home1.cloud.config.server.security;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 

@@ -1,4 +1,6 @@
-package ai.advance.cloud.config.server;
+package cn.home1.cloud.config.server;
+
+import cn.home1.cloud.config.server.security.ConfigServerSecurityProperties;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,8 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
 import java.util.Base64;
-
-import ai.advance.cloud.config.server.security.ConfigServerSecurityProperties;
 
 @Ignore
 @Slf4j

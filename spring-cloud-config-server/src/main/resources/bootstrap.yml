@@ -5,13 +5,17 @@ spring:
   cloud:
     config:
       enabled: false
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:consul.local}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+
 
 # see: org.springframework.cloud.config.server.config.EncryptionAutoConfiguration
 encrypt:
   failOnError: false
   #key: changeme # symmetric encryption
   key-store: # asymmetric encryption
-    alias: ${ENCRYPT_KEYSTORE_ALIAS:key_alias}
-    secret: ${ENCRYPT_KEYSTORE_SECRET:key_pass}
-    password: ${ENCRYPT_KEYSTORE_PASSWORD:store_pass}
-    location: ${ENCRYPT_KEYSTORE_LOCATION:classpath:keystore.jks}
+    alias: ${ENCRYPT_KEYSTORE_ALIAS:key_alias} # changeme
+    secret: ${ENCRYPT_KEYSTORE_SECRET:key_pass} # changeme
+    password: ${ENCRYPT_KEYSTORE_PASSWORD:store_pass} # changeme
+    location: ${ENCRYPT_KEYSTORE_LOCATION:classpath:default-keystore.jks}

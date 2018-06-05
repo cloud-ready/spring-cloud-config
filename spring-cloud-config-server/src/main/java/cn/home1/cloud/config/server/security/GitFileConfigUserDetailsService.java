@@ -1,10 +1,10 @@
-package ai.advance.cloud.config.server.security;
+package cn.home1.cloud.config.server.security;
 
-import static ai.advance.cloud.config.server.security.Role.ADMIN;
-import static ai.advance.cloud.config.server.security.Role.HOOK;
-import static ai.advance.cloud.config.server.security.Role.USER;
+import static cn.home1.cloud.config.server.util.EnvironmentUtils.getConfigPassword;
 
 import com.google.common.collect.ImmutableList;
+
+import cn.home1.cloud.config.server.util.Consts;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collection;
 
-import ai.advance.cloud.config.server.util.Consts;
-import ai.advance.cloud.config.server.util.EnvironmentUtils;
-
 /**
  * config-server-client use the password configured in GIT. the user name must be the app name.
  */
@@ -33,13 +30,16 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
   private static final Collection<? extends GrantedAuthority> ANONYMOUS_AUTHORITY = ImmutableList.of();
 
   private static final Collection<? extends GrantedAuthority> ADMIN_AUTHORITY =
-      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + ADMIN.toString()));
+      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.ADMIN.toString()));
 
   private static final Collection<? extends GrantedAuthority> HOOK_AUTHORITY =
-      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + HOOK.toString()));
+      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.HOOK.toString()));
 
   private static final Collection<? extends GrantedAuthority> USER_AUTHORITY =
-      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + USER.toString()));
+      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.USER.toString()));
+
+  @Setter
+  private ConfigSecurity configSecurity;
 
   @Setter
   private EnvironmentController environmentController;
@@ -76,12 +76,13 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
       throw new UsernameNotFoundException("can not find the project with the name:" + username);
     }
 
-    final String configPassword = EnvironmentUtils.getConfigPassword(environment);
-    if (configPassword == null) {
+    final String expectedPassword = getConfigPassword(environment);
+    if (expectedPassword == null) {
       throw new BadCredentialsException(
           "can not find the configPassword (spring.cloud.config.configPassword) from environment:" + environment.getName());
     }
+    final String rawExpectedPassword = this.configSecurity.decryptProperty(expectedPassword);
 
-    return new User(username, configPassword, USER_AUTHORITY);
+    return new User(username, rawExpectedPassword, USER_AUTHORITY);
   }
 }

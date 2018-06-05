@@ -20,18 +20,15 @@
 
     <build>
         <plugins>
+            <!-- @formatter:off -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
-                <configuration>
-                    <mainClass>ai.advance.cloud.config.server.ConfigServer</mainClass>
-                </configuration>
+                <configuration><mainClass>cn.home1.cloud.config.server.ConfigServer</mainClass></configuration>
             </plugin>
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-            </plugin>
+            <plugin><groupId>com.spotify</groupId><artifactId>dockerfile-maven-plugin</artifactId></plugin>
+            <!-- @formatter:on -->
         </plugins>
     </build>
 
@@ -42,9 +39,15 @@
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-configuration-processor</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-log4j2</artifactId></dependency>
         <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-eureka</artifactId></dependency>
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-consul-all</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId><scope>runtime</scope></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId><scope>runtime</scope></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-undertow</artifactId><scope>runtime</scope></dependency>
+
+        <!-- TODO dependency management versions -->
+        <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId><version>3.3.0</version></dependency>
+
+        <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>0.0.1-SNAPSHOT</version></dependency>
 
         <dependency><groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId></dependency>
         <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId></dependency>

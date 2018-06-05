@@ -1,4 +1,4 @@
-package ai.advance.cloud.config.server.security;
+package cn.home1.cloud.config.server.security;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

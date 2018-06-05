@@ -1,7 +1,7 @@
-package ai.advance.cloud.config.server.security;
+package cn.home1.cloud.config.server.security;
 
-import static ai.advance.cloud.config.server.security.Role.ADMIN;
-import static ai.advance.cloud.config.server.security.Role.HOOK;
+import static cn.home1.cloud.config.server.security.Role.ADMIN;
+import static cn.home1.cloud.config.server.security.Role.HOOK;
 import static org.springframework.boot.autoconfigure.security.SecurityProperties.ACCESS_OVERRIDE_ORDER;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,9 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 @EnableWebSecurity
 @Order(ACCESS_OVERRIDE_ORDER)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+  @Autowired
+  private ConfigSecurity configSecurity;
 
   @Autowired
   private EnvironmentController environmentController;
@@ -54,26 +57,24 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http //
         .csrf().disable() //
         .authorizeRequests() //
-        .antMatchers(this.configServerPrefix + "/").permitAll()//
-        .antMatchers(this.configServerPrefix + "/deployKeyPublic").permitAll()//
-        .antMatchers(this.configServerPrefix + "/encrypt", this.monitorEndpoint)
-        .hasAnyRole(ADMIN.toString(), HOOK.toString())
-        .antMatchers(this.configServerPrefix + "/decrypt")
-        .hasRole(ADMIN.toString()) //
+        .antMatchers(this.configServerPrefix + "/").permitAll() //
+        .antMatchers(this.configServerPrefix + "/deployKeyPublic").permitAll() //
+        .antMatchers(this.configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
+        .antMatchers(this.configServerPrefix + "/encrypt", this.monitorEndpoint).permitAll() //
+        .antMatchers(this.configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
         .antMatchers(new String[]{ //
-            this.configServerPrefix + "/{name}/{profiles:.*[^-].*}", //
-            this.configServerPrefix + "/{name}/{profiles}/{label:.*}", //
-            this.configServerPrefix + "/{name}-{profiles}.properties", //
-            this.configServerPrefix + "/{label}/{name}-{profiles}.properties", //
-            this.configServerPrefix + "/{name}-{profiles}.json", //
-            this.configServerPrefix + "/{label}/{name}-{profiles}.json", //
-            this.configServerPrefix + "/{name}-{profiles}.yml", //
-            this.configServerPrefix + "/{name}-{profiles}.yaml", //
-            this.configServerPrefix + "/{label}/{name}-{profiles}.yml", //
-            this.configServerPrefix + "/{label}/{name}-{profiles}.yaml", //
-            this.configServerPrefix + "/{name}/{profile}/{label}/**", //
-            this.configServerPrefix + "/{name}/{profile}/{label}/**",//
-        }).access("@applicationConfigSecurity.checkAuthenticationName(#name)")//
+            this.configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
+            this.configServerPrefix + "/{application}/{profiles}/{label:.*}", //
+            this.configServerPrefix + "/{application}-{profiles}.json", //
+            this.configServerPrefix + "/{label}/{application}-{profiles}.json", //
+            this.configServerPrefix + "/{application}-{profiles}.properties", //
+            this.configServerPrefix + "/{application}/{name}-{profiles}.properties", //
+            this.configServerPrefix + "/{application}-{profiles}.yml", //
+            this.configServerPrefix + "/{application}-{profiles}.yaml", //
+            this.configServerPrefix + "/{label}/{application}-{profiles}.yml", //
+            this.configServerPrefix + "/{label}/{application}-{profiles}.yaml", //
+            this.configServerPrefix + "/{application}/{profiles}/{label}/**", //
+        }).access("@applicationConfigSecurity.checkAuthenticationName(#application)")//
         .anyRequest().hasRole(ADMIN.toString()) //
         .and() //
         .httpBasic();
@@ -92,8 +93,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean
   public GitFileConfigUserDetailsService userDetailsService() {
     final GitFileConfigUserDetailsService userDetailsService = new GitFileConfigUserDetailsService();
-    userDetailsService.setEnvironmentController(this.environmentController);
+    userDetailsService.setConfigSecurity(this.configSecurity);
     userDetailsService.setConfigServerSecurityProperties(this.configServerSecurityProperties());
+    userDetailsService.setEnvironmentController(this.environmentController);
     return userDetailsService;
   }
 }

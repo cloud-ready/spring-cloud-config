@@ -1,4 +1,4 @@
-package ai.advance.cloud.config.server.ssh;
+package cn.home1.cloud.config.server.ssh;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
