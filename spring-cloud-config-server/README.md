@@ -1,6 +1,10 @@
 #spring-cloud-config-server
 spring-cloud-config-server
 
+
+[![Build Status](https://travis-ci.org/cloud-ready/spring-cloud-config.svg?branch=master)](https://travis-ci.org/cloud-ready/spring-cloud-config)
+
+
 ## Local demostration
 
 1. Create a local docker network
