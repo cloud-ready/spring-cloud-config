@@ -208,7 +208,7 @@ Do not use the default deploy key comes with local demostration.
 
 Generate a new deploy key for your staging or production environment.
 ```bash
-ssh-keygen -t rsa -b 2048 -f src/main/resources/production-deploy_key -q -N "" -C "config-server@your_domain"
+ssh-keygen -t rsa -b 2048 -f production-deploy_key -q -N "" -C "config-server@your_domain"
 ```
 
 2. Encrypt key and keystore
@@ -280,7 +280,7 @@ keytool -genkeypair \
 -keystore production-keystore.jks
 ```
 
-Change the value of option `alias` and `keypass` then run `keytool` again can generate multiple key pairs.  
+Change the value of option `alias` and `keypass` then run `keytool` again can create and save multiple key pairs into same jks file.  
 To list key pairs in jks file, run `keytool -list -storepass ${ENCRYPT_KEYSTORE_PASSWORD} -keystore production-keystore.jks`.
 
 

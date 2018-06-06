@@ -115,7 +115,8 @@ spring:
       discovery:
         health-check-path: ${SERVER_CONTEXTPATH:${server.context-path}}${MANAGEMENT_CONTEXTPATH:${management.context-path}}/health
         hostname: ${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${spring.cloud.client.ipAddress}}
-        instance-id: ${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:config-server.local}:${spring.application.name}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}:${random.value}
+        # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
+        instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}:${random.value}
         enabled: ${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:true}
       enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
 
