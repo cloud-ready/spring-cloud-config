@@ -61,6 +61,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .antMatchers(this.configServerPrefix + "/deployKeyPublic").permitAll() //
         .antMatchers(this.configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
         .antMatchers(this.configServerPrefix + "/encrypt", this.monitorEndpoint).permitAll() //
+        .antMatchers(this.configServerPrefix + "/encryptParentPassword").hasRole(ADMIN.toString()) //
         .antMatchers(this.configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
         .antMatchers(new String[]{ //
             this.configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
