@@ -2,7 +2,7 @@
 version: '2.1'
 services:
   config-server:
-    image: cloudready/config-server:${PROJECT_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-cloudready}/spring-cloud-config-server:${PROJECT_VERSION:-0.0.1-SNAPSHOT}
     restart: always
     command: []
     container_name: ${INSTANCE_HOSTNAME:-config-server.local}
