@@ -7,6 +7,7 @@ services:
     command: []
     container_name: ${INSTANCE_HOSTNAME:-config-server.local}
     hostname: ${INSTANCE_HOSTNAME:-config-server.local}
+    #network_mode: host
     networks:
       local-network:
         ipv4_address: 172.16.238.18
@@ -38,7 +39,7 @@ services:
     #- GIT_PREFIX=${GIT_PREFIX:-ssh://git@github.com:22/spring-cloud-config-server}
 
     - SECURITY_USER_PASSWORD=${SECURITY_USER_PASSWORD:-admin_pass}
-    - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server.local}
+    - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
     - SERVER_PORT=${SERVER_PORT:-8888}
     - SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET=${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:-secret}
     - SPRING_CLOUD_CONFIG_SERVER_COMMONCONFIG_APPLICATION=${SPRING_CLOUD_CONFIG_SERVER_COMMONCONFIG_APPLICATION:-common}
