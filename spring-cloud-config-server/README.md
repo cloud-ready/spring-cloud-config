@@ -120,7 +120,9 @@ This config-server extends spring-cloud's default config-server.
 
 Note:
 + It is recommended to use a encrypted `spring.cloud.config.parent.password` in config file.
-+ Must call `/encryptParentPassword` to generate a encrypted and signed parent password (token).
++ Do not use a plain text parent password or password encrypted by  `/encrypt` endpoint.
+> Anyone who copied it will get privilege to access parent config repository.
++ Use `/encryptParentPassword` to generate a encrypted and signed parent password (token), only admin can do this.
 ```bash
 curl -s -X POST http://config-server.local:8888/config/encryptParentPassword \
 -H "Content-Type: application/x-www-form-urlencoded" \
