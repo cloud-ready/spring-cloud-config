@@ -2,6 +2,7 @@ package cn.home1.cloud.config.server.environment;
 
 import cn.home1.cloud.config.server.security.ConfigSecurity;
 
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,15 +17,29 @@ import org.springframework.core.env.ConfigurableEnvironment;
 @Configuration
 public class GitParentSupportConfiguration {
 
+  @Autowired
+  private ConfigSecurity configSecurity;
+
+  @Value("${spring.cloud.config.server.default-label:master}")
+  private String defaultLabel;
+
+  @Value("${spring.cloud.config.server.git.delete-untracked-branches:true}")
+  private Boolean deleteUntrackedBranches;
 
   @Autowired
   private ConfigurableEnvironment environment;
 
-  @Autowired
-  private ConfigSecurity configSecurity;
+  @Value("${spring.cloud.config.server.git.force-pull:true}")
+  private Boolean forcePull;
+
+  @Value("${spring.cloud.config.server.git.strict-host-key-checking:false}")
+  private Boolean strictHostKeyChecking;
 
   @Value("${spring.cloud.config.server.git.timeout:30}")
   private Integer timeout;
+
+  @Autowired(required = false)
+  private TransportConfigCallback transportConfigCallback;
 
   @Bean
   @ConditionalOnMissingBean(EnvironmentRepository.class)
@@ -34,9 +49,13 @@ public class GitParentSupportConfiguration {
 
     repository.setConfigSecurity(this.configSecurity);
 
-    if (this.timeout != null) {
-      repository.setTimeout(this.timeout);
-    }
+    repository.setDefaultLabel(this.defaultLabel);
+    repository.setDeleteUntrackedBranches(this.deleteUntrackedBranches);
+    repository.setForcePull(this.forcePull);
+    repository.setStrictHostKeyChecking(this.strictHostKeyChecking);
+    repository.setTimeout(this.timeout);
+
+    repository.setTransportConfigCallback(this.transportConfigCallback);
 
     return repository;
   }

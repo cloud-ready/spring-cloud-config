@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import cn.home1.cloud.config.server.security.ConfigSecurity;
-import cn.home1.cloud.config.server.util.Consts;
 import cn.home1.cloud.config.server.util.EnvironmentUtils;
 
 import lombok.Setter;
@@ -81,7 +80,7 @@ public class GitParentSupportMultipleJGitEnvironmentRepository extends MultipleJ
 
     String[] profiles = environment.getProfiles();
     if (profiles == null || profiles.length == 0) {
-      profiles = new String[]{Consts.PROFILE_NOT_EXIST};
+      profiles = new String[]{"default"};
     }
 
     for (final String profile : profiles) {

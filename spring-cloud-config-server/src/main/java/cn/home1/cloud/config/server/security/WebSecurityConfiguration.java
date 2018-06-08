@@ -7,6 +7,7 @@ import static org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.config.server.config.ConfigServerProperties;
 import org.springframework.cloud.config.server.environment.EnvironmentController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,19 +29,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private ConfigSecurity configSecurity;
 
   @Autowired
+  private ConfigServerProperties configServerProperties;
+
+  @Autowired
   private EnvironmentController environmentController;
-
-  @Value("${spring.cloud.config.server.prefix:}")
-  private String configServerPrefix;
-
-  @Value("${spring.cloud.config.server.prefix:}/users/login")
-  private String loginEndpoint;
 
   @Value("${management.context-path:}")
   private String managementContextPath;
-
-  @Value("${spring.cloud.config.server.monitor.endpoint.path:}/monitor")
-  private String monitorEndpoint;
 
   @Override
   public void init(final WebSecurity web) throws Exception {
@@ -54,28 +49,32 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
+    final String configServerPrefix = this.configServerProperties.getPrefix();
+    final String loginEndpoint = configServerPrefix + "/users/login";
+    final String monitorEndpoint = configServerPrefix + "/monitor";
+
     http //
         .csrf().disable() //
         .authorizeRequests() //
-        .antMatchers(this.configServerPrefix + "/").permitAll() //
-        .antMatchers(this.configServerPrefix + "/deployKeyPublic").permitAll() //
-        .antMatchers(this.configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
-        .antMatchers(this.configServerPrefix + "/encrypt", this.monitorEndpoint).permitAll() //
-        .antMatchers(this.configServerPrefix + "/encryptParentPassword").hasRole(ADMIN.toString()) //
-        .antMatchers(this.configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
+        .antMatchers(configServerPrefix + "/").permitAll() //
+        .antMatchers(configServerPrefix + "/deployKeyPublic").permitAll() //
+        .antMatchers(configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
+        .antMatchers(configServerPrefix + "/encrypt", monitorEndpoint).permitAll() //
+        .antMatchers(configServerPrefix + "/encryptParentPassword").hasRole(ADMIN.toString()) //
+        .antMatchers(configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
         .antMatchers(new String[]{ //
-            this.configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
-            this.configServerPrefix + "/{application}/{profiles}/{label:.*}", //
-            this.configServerPrefix + "/{application}-{profiles}.json", //
-            this.configServerPrefix + "/{label}/{application}-{profiles}.json", //
-            this.configServerPrefix + "/{application}-{profiles}.properties", //
-            this.configServerPrefix + "/{application}/{name}-{profiles}.properties", //
-            this.configServerPrefix + "/{application}-{profiles}.yml", //
-            this.configServerPrefix + "/{application}-{profiles}.yaml", //
-            this.configServerPrefix + "/{label}/{application}-{profiles}.yml", //
-            this.configServerPrefix + "/{label}/{application}-{profiles}.yaml", //
-            this.configServerPrefix + "/{application}/{profiles}/{label}/**", //
-        }).access("@applicationConfigSecurity.checkAuthenticationName(#application)")//
+            configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
+            configServerPrefix + "/{application}/{profiles}/{label:.*}", //
+            configServerPrefix + "/{application}-{profiles}.json", //
+            configServerPrefix + "/{label}/{application}-{profiles}.json", //
+            configServerPrefix + "/{application}-{profiles}.properties", //
+            configServerPrefix + "/{application}/{name}-{profiles}.properties", //
+            configServerPrefix + "/{application}-{profiles}.yml", //
+            configServerPrefix + "/{application}-{profiles}.yaml", //
+            configServerPrefix + "/{label}/{application}-{profiles}.yml", //
+            configServerPrefix + "/{label}/{application}-{profiles}.yaml", //
+            configServerPrefix + "/{application}/{profiles}/{label}/**", //
+        }).access("@applicationConfigSecurity.checkAuthentication(#application,#profiles)")//
         .anyRequest().hasRole(ADMIN.toString()) //
         .and() //
         .httpBasic();
@@ -87,15 +86,16 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public ConfigServerSecurityProperties configServerSecurityProperties() {
-    return new ConfigServerSecurityProperties();
+  public PrivilegedUserProperties privilegedUserProperties() {
+    return new PrivilegedUserProperties();
   }
 
   @Bean
   public GitFileConfigUserDetailsService userDetailsService() {
     final GitFileConfigUserDetailsService userDetailsService = new GitFileConfigUserDetailsService();
     userDetailsService.setConfigSecurity(this.configSecurity);
-    userDetailsService.setConfigServerSecurityProperties(this.configServerSecurityProperties());
+    userDetailsService.setDefaultLabel(this.configServerProperties.getDefaultLabel());
+    userDetailsService.setPrivilegedUserProperties(this.privilegedUserProperties());
     userDetailsService.setEnvironmentController(this.environmentController);
     return userDetailsService;
   }

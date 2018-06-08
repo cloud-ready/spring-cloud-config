@@ -122,6 +122,9 @@ Note:
 + It is recommended to use a encrypted `spring.cloud.config.parent.password` in config file.
 + Do not use a plain text parent password or password encrypted by  `/encrypt` endpoint.
 > Anyone who copied it will get privilege to access parent config repository.
++ You can use different `spring.cloud.config.parent.password` in label-develop, profile-staging, profile-production configs to protect sensible properties.
+> If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
+> i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
 + Use `/encryptParentPassword` to generate a encrypted and signed parent password (token), only admin can do this.
 ```bash
 curl -s -X POST http://config-server.local:8888/config/encryptParentPassword \
@@ -150,7 +153,10 @@ curl -s -X GET -u demo-app:demo-app_pass http://config-server.local:8888/config/
 > Users can specify a `spring.cloud.config.password: <password>` in config file to protect their config file url endpoints.
 
 Note:
-+ config-server load `spring.cloud.config.password` with out profile, so do not define it under any custom profile.
++ config-server support load `spring.cloud.config.password` form environment profiles or default profile.
++ You can use different `spring.cloud.config.password` in label-develop, profile-staging, profile-production configs to protect sensible properties.
+> If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
+> i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
 + config-server will use parent's `spring.cloud.config.password` if child's `spring.cloud.config.password` absent and it has a parent.
 + It is recommended to use a encrypted `spring.cloud.config.password` in config file.
 
@@ -160,17 +166,16 @@ spring.cloud.config.password: demo-app_pass
 ```
 
 - Custom Feature 3. Git deploy key in file or in classpath
-> `spring.cloud.config.git.deploy-key.public: classpath:<filename> or file:<filename>`   
-`spring.cloud.config.git.deploy-key.private: classpath:<filename> or file:<filename>`  
+> `spring.cloud.config.git.deploy-key: classpath:<filename> or file:<filename>`
+
+The property in application.yml specifies the private key, public key is privateKey + ".pub".
 
 config-server's application.yml example:
 ```yaml
 spring.cloud:
   config:
       git:
-        deploy-key: # custom property
-          private: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY_PRIVATE:classpath:default-deploy_key}
-          public: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY_PRIVATE:classpath:default-deploy_key}.pub
+        deploy-key: ${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:classpath:default-deploy_key}
 ```
 
 - Custom Feature 4. Security on web-hook endpoint
@@ -286,7 +291,12 @@ To list key pairs in jks file, run `keytool -list -storepass ${ENCRYPT_KEYSTORE_
 
 ## Appendix
 
-A. [config properties](https://cloud.spring.io/spring-cloud-static/Dalston.SR4/multi/multi__appendix_compendium_of_configuration_properties.html)
+A. Details of git repository access
+
+org.springframework.cloud.config.server.environment.AbstractScmEnvironmentRepository.getLocations
+org.springframework.cloud.config.server.environment.JGitEnvironmentRepository.createGitClient, copyRepository, cloneToBasedir, configureCommand
+
+B. [config properties](https://cloud.spring.io/spring-cloud-static/Dalston.SR4/multi/multi__appendix_compendium_of_configuration_properties.html)
 
 ## TODO
 Rate limit on /encrypt endpoint

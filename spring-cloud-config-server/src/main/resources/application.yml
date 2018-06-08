@@ -26,7 +26,7 @@ management:
 
 # consul needs endpoint.health to check service status,
 # set sensitive to false will hide detailed infos but need not to authenticate.
-endpoints.health.sensitive: false
+endpoints.health.sensitive: ${ENDPOINTS_HEALTH_SENSITIVE:false}
 
 security:
   basic.enabled: ${SECURITY_BASIC_ENABLED:true}
@@ -51,12 +51,9 @@ eureka:
     health-check-url-path: ${endpoints.health.path:/health}
     # eureka.instance.hostname affect Status->instances's url href (not text) value on dashboard
     hostname: ${EUREKA_INSTANCE_HOSTNAME:config-server.local}
-    # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
-    instance-id: ${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${spring.application.name}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}
     lease-renewal-interval-in-seconds: 10
     metadataMap:
       configPath: ${spring.cloud.config.server.prefix}
-    non-secure-port: ${EUREKA_INSTANCE_NONSECUREPORT:8888}
     prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
     status-page-url-path: ${endpoints.info.path:/info}
     # Registering a Secure Application
@@ -88,7 +85,7 @@ spring:
         default-label: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL:master}
         default-profile: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE:default}
         encrypt:
-          hmac-secret: ${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:secret}
+          hmac-secret: ${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:secret} # custom property: hmac-secret
           enabled: true
         health.repositories: # default is 'app'
           health-check-repository:
@@ -96,11 +93,16 @@ spring:
         git:
           clone-on-start: false
           delete-untracked-branches: true
-          deploy-key: # custom property
-            private: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY_PRIVATE:classpath:default-deploy_key}
-            public: ${SPRING_CLOUD_CONFIG_SERVER_DEPLOYKEY_PUBLIC:classpath:default-deploy_key.pub}
+          deploy-key: ${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:classpath:default-deploy_key} # custom property: deploy-key
+          # Property 'spring.cloud.config.server.git.privateKey' must be set when 'spring.cloud.config.server.git.ignoreLocalSshSettings' is specified
+          #ignore-local-ssh-settings: ${SPRING_CLOUD_CONFIG_SERVER_GIT_IGNORELOCALSSHSETTINGS:true}
           force-pull: true
-          parent-support-enabled: true
+          known-hosts-file: ${SPRING_CLOUD_CONFIG_SERVER_GIT_KNOWNHOSTSFILE:/dev/null}
+          parent-support-enabled: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PARENTSUPPORTENABLED:true} # custom property: parent-support-enabled
+          search-paths:
+          - 'label-{label}'
+          - 'profile-{profile}'
+          strict-host-key-checking: ${SPRING_CLOUD_CONFIG_SERVER_GIT_STRICTHOSTKEYCHECKING:false}
           timeout: 30
           #uri: ${GIT_PREFIX:ssh://git@gitlab.local:20022/spring-cloud-config-server}/{application}-config.git
           uri: ${GIT_PREFIX:https://github.com/spring-cloud-config-server}/{application}-config.git
@@ -109,14 +111,12 @@ spring:
           bitbucket.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED:false}
           github.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITHUB_ENABLED:false}
           gitlab.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLAB_ENABLED:false}
-          gitlabrepo.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED:false}
+          gitlabrepo.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED:false} # custom property: gitlabrepo.enabled
         prefix: /config
     consul:
       discovery:
         health-check-path: ${SERVER_CONTEXTPATH:${server.context-path}}${MANAGEMENT_CONTEXTPATH:${management.context-path}}/health
         hostname: ${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${spring.cloud.client.ipAddress}}
-        # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
-        instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}:${random.value}
         enabled: ${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:true}
       enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
 
@@ -134,6 +134,40 @@ spring:
 #    port: ${SPRING_RABBITMQ_PORT:5672}
 #    username: ${SPRING_RABBITMQ_USERNAME:user}
 #    password: ${SPRING_RABBITMQ_PASSWORD:user_pass}
+
+---
+spring:
+  profiles: port_nonsecure
+
+eureka.instance:
+  # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
+  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}
+  non-secure-port: ${EUREKA_INSTANCE_NONSECUREPORT:8888}
+  non-secure-port-enabled: true
+  secure-port-enabled: false
+
+spring.cloud.consul:
+  discovery:
+    health-check-url: http://${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}${SERVER_CONTEXTPATH:${server.context-path}}${MANAGEMENT_CONTEXTPATH:${management.context-path}}/health
+    # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
+    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:8888}}:${random.value}
+
+---
+spring:
+  profiles: port_secure
+
+eureka.instance:
+  # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
+  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:8888}}
+  non-secure-port-enabled: false
+  secure-port: ${EUREKA_INSTANCE_SECUREPORT:8888}
+  secure-port-enabled: true
+
+spring.cloud.consul:
+  discovery:
+    health-check-url: https://${EUREKA_INSTANCE_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:8888}}${SERVER_CONTEXTPATH:${server.context-path}}${MANAGEMENT_CONTEXTPATH:${management.context-path}}/health
+    # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
+    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:config-server.local}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:8888}}:${random.value}
 
 ---
 spring:
