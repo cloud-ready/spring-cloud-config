@@ -86,4 +86,10 @@ public abstract class EnvironmentUtils {
     final String evnPropertyValue = getEnvProperty(environment, "spring.cloud.config.parent.label");
     return evnPropertyValue != null && label != null ? evnPropertyValue.replace("{label}", label) : label;
   }
+
+  @Deprecated
+  public static String getParentProfile(final Environment environment, final String profile) {
+    final String evnPropertyValue = getEnvProperty(environment, "spring.cloud.config.parent.profile");
+    return evnPropertyValue != null && profile != null ? evnPropertyValue.replace("{profile}", profile) : profile;
+  }
 }

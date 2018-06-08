@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 @Getter
 @Setter
 @Slf4j
-public class ConfigServerSecurityProperties {
+public class PrivilegedUserProperties {
 
   @Value("${security.user.name:admin}")
   private String adminName;

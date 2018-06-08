@@ -1,10 +1,11 @@
 package cn.home1.cloud.config.server.security;
 
+import static cn.home1.cloud.config.server.util.Consts.DOT_ENV;
+import static cn.home1.cloud.config.server.util.Consts.PRIVILEGE_ENV_PROFILE_;
+import static cn.home1.cloud.config.server.util.Consts.PRIVILEGE_ENV_PROFILE_WILDCARD;
 import static cn.home1.cloud.config.server.util.EnvironmentUtils.getConfigPassword;
 
 import com.google.common.collect.ImmutableList;
-
-import cn.home1.cloud.config.server.util.Consts;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * config-server-client use the password configured in GIT. the user name must be the app name.
  */
 @Slf4j
 public class GitFileConfigUserDetailsService implements UserDetailsService {
+
+  private static final Pattern PATTERN_AT = Pattern.compile("@");
 
   private static final Collection<? extends GrantedAuthority> ANONYMOUS_AUTHORITY = ImmutableList.of();
 
@@ -35,17 +41,20 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
   private static final Collection<? extends GrantedAuthority> HOOK_AUTHORITY =
       ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.HOOK.toString()));
 
-  private static final Collection<? extends GrantedAuthority> USER_AUTHORITY =
-      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.USER.toString()));
+  private static final GrantedAuthority USER_AUTHORITY = new SimpleGrantedAuthority( //
+      "ROLE_" + Role.USER.toString());
 
   @Setter
   private ConfigSecurity configSecurity;
 
   @Setter
+  private String defaultLabel;
+
+  @Setter
   private EnvironmentController environmentController;
 
   @Setter
-  private ConfigServerSecurityProperties configServerSecurityProperties;
+  private PrivilegedUserProperties PrivilegedUserProperties;
 
   @Override
   public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
@@ -53,36 +62,75 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
       return new User("anonymous", "", ANONYMOUS_AUTHORITY);
     }
 
-    if (username.equals(this.configServerSecurityProperties.getAdminName())) {
-      return new User(username, this.configServerSecurityProperties.getAdminPassword(), ADMIN_AUTHORITY);
+    if (username.equals(this.PrivilegedUserProperties.getAdminName())) {
+      return new User(username, this.PrivilegedUserProperties.getAdminPassword(), ADMIN_AUTHORITY);
     }
 
-    if (username.equals(this.configServerSecurityProperties.getHookName())) {
-      return new User(username, this.configServerSecurityProperties.getHookPassword(), HOOK_AUTHORITY);
+    if (username.equals(this.PrivilegedUserProperties.getHookName())) {
+      return new User(username, this.PrivilegedUserProperties.getHookPassword(), HOOK_AUTHORITY);
     }
 
-    // get environment without profile
+    // username is `spring.application.name` or `spring.application.name@{profile.env}`
+    final String application;
+    final String profileToAuth;
+    final Optional<GrantedAuthority> privilege; // privilege of environment profile: can be specific one, none or anyone
+    if (username.contains("@") && username.endsWith(DOT_ENV)) {
+      final Iterator<String> parts = PATTERN_AT.splitAsStream(username).iterator();
+      application = parts.next();
+      profileToAuth = parts.next();
+      privilege = Optional.of(new SimpleGrantedAuthority(PRIVILEGE_ENV_PROFILE_ + profileToAuth));
+    } else if (username.endsWith("@default")) {
+      final Iterator<String> parts = PATTERN_AT.splitAsStream(username).iterator();
+      application = parts.next();
+      profileToAuth = parts.next();
+      privilege = Optional.empty();
+    } else {
+      application = username;
+      profileToAuth = "default";
+      privilege = Optional.of(new SimpleGrantedAuthority(PRIVILEGE_ENV_PROFILE_WILDCARD));
+    }
+    final Collection<GrantedAuthority> authorities = privilege.isPresent() ? //
+        ImmutableList.of(USER_AUTHORITY, privilege.get()) : ImmutableList.of(USER_AUTHORITY);
+
+
+    final String expectedPassword = this.findExpectedPassword(application, profileToAuth);
+    if (expectedPassword == null) {
+      throw new BadCredentialsException(
+          "can not find 'spring.cloud.config.password' application: " + application + ", profile: " + profileToAuth);
+    }
+    final String rawExpectedPassword = this.configSecurity.decryptProperty(expectedPassword);
+
+    return new User(application, rawExpectedPassword, authorities);
+  }
+
+  String findExpectedPassword(final String application, final String profile) {
+    final String result;
+
+    if (this.defaultLabel != null) {
+      final String found = this.findExpectedPassword(application, profile, this.defaultLabel);
+      result = found != null ? found : this.findExpectedPassword(application, profile, null);
+    } else {
+      result = this.findExpectedPassword(application, profile, null);
+    }
+
+    return result;
+  }
+
+  String findExpectedPassword(final String application, final String profile, final String label) {
     final Environment environment;
 
     try {
-      environment = this.environmentController.defaultLabel(username, Consts.PROFILE_NOT_EXIST);
+      environment = this.environmentController.labelled(application, profile, label);
     } catch (final Exception exception) {
-      log.warn("error on loadUserByUsername from git configuration file, application (user) name:{} ", //
-          username, exception);
+      log.warn("error on loadUserByUsername from git configuration file, username: {}", //
+          application, exception);
       throw exception;
     }
 
     if (environment == null) {
-      throw new UsernameNotFoundException("can not find the project with the name:" + username);
+      throw new UsernameNotFoundException("can not find the project by username: " + application);
     }
 
-    final String expectedPassword = getConfigPassword(environment);
-    if (expectedPassword == null) {
-      throw new BadCredentialsException(
-          "can not find the configPassword (spring.cloud.config.configPassword) from environment:" + environment.getName());
-    }
-    final String rawExpectedPassword = this.configSecurity.decryptProperty(expectedPassword);
-
-    return new User(username, rawExpectedPassword, USER_AUTHORITY);
+    return getConfigPassword(environment);
   }
 }

@@ -1,6 +1,8 @@
 package cn.home1.cloud.config.server;
 
-import cn.home1.cloud.config.server.security.ConfigServerSecurityProperties;
+import static cn.home1.cloud.config.server.util.Consts.DOT_ENV;
+
+import cn.home1.cloud.config.server.security.PrivilegedUserProperties;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +31,7 @@ import java.util.Base64;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ConfigServer.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-public class ConfigServerSecurityPropertiesTest {
+public class PrivilegedUserPropertiesTest {
 
 
   private String firstAppName = "my-config-test";
@@ -46,7 +48,7 @@ public class ConfigServerSecurityPropertiesTest {
   private TestRestTemplate restTemplate;
 
   @Autowired
-  private ConfigServerSecurityProperties configServerSecurityProperties;
+  private PrivilegedUserProperties privilegedUserProperties;
 
   @Value("${spring.cloud.config.server.prefix:}")
   private String configServerPrefix;
@@ -66,8 +68,7 @@ public class ConfigServerSecurityPropertiesTest {
 
     firstAppAuthHttpEntity = structHttpEntityWithAuthHeaders(firstAppName, firstAppPassword);
 
-    adminAuthHttpEntity = structHttpEntityWithAuthHeaders(configServerSecurityProperties.getAdminName(), configServerSecurityProperties.getAdminPassword());
-
+    adminAuthHttpEntity = structHttpEntityWithAuthHeaders(privilegedUserProperties.getAdminName(), privilegedUserProperties.getAdminPassword());
   }
 
   private <T> HttpEntity<T> structHttpEntityWithAuthHeaders(final String name, final String password) {
@@ -80,7 +81,7 @@ public class ConfigServerSecurityPropertiesTest {
 
   @Test
   public void anonymityHasNoPrivilegeTest() {
-    String requestUrl = host + "/" + firstAppName + "/development.env";
+    String requestUrl = host + "/" + firstAppName + "/development" + DOT_ENV;
     log.info(requestUrl);
     ResponseEntity<String> result = this.restTemplate.exchange(requestUrl, HttpMethod.GET, null, String.class);
     log.info(result.getStatusCode().toString());
@@ -90,7 +91,7 @@ public class ConfigServerSecurityPropertiesTest {
 
   @Test
   public void differentUserHasNoPrivilegeTest() {
-    String requestUrl = host + this.configServerPrefix + "/" + secondAppName + "/development.env";
+    String requestUrl = host + this.configServerPrefix + "/" + secondAppName + "/development" + DOT_ENV;
     log.info(requestUrl);
     ResponseEntity<String> result =
         this.restTemplate.exchange(requestUrl, HttpMethod.GET, firstAppAuthHttpEntity, String.class);
@@ -101,7 +102,7 @@ public class ConfigServerSecurityPropertiesTest {
 
   @Test
   public void currentUserHasPrivilegeTest() {
-    String requestUrl = host + this.configServerPrefix + "/" + firstAppName + "/development.env";
+    String requestUrl = host + this.configServerPrefix + "/" + firstAppName + "/development" + DOT_ENV;
     log.info(requestUrl);
     ResponseEntity<String> result =
         this.restTemplate.exchange(requestUrl, HttpMethod.GET, firstAppAuthHttpEntity, String.class);
@@ -111,12 +112,11 @@ public class ConfigServerSecurityPropertiesTest {
 
   @Test
   public void adminUserHasPrivilegeTest() throws Exception {
-    String requestUrl = host + this.configServerPrefix + "/" + firstAppName + "/development.env";
+    String requestUrl = host + this.configServerPrefix + "/" + firstAppName + "/development" + DOT_ENV;
     log.info(requestUrl);
     ResponseEntity<String> result =
         this.restTemplate.exchange(requestUrl, HttpMethod.GET, adminAuthHttpEntity, String.class);
     log.info(result.getStatusCode().toString());
     Assert.assertTrue(result.getStatusCode() == HttpStatus.OK);
   }
-
 }

@@ -13,6 +13,7 @@ import org.eclipse.jgit.util.FS;
  *
  * Created by zhanghaolun on 16/9/18.
  */
+@Deprecated
 public class CustomJschConfigSessionFactory extends JschConfigSessionFactory {
 
   private String[] identityKeyPaths;
