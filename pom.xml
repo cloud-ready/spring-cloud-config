@@ -36,7 +36,7 @@
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
         <log-config.version>0.0.4.OSS</log-config.version>
-        <service-discovery.version>0.0.1-SNAPSHOT</service-discovery.version>
+        <service-discovery.version>0.0.1</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
         <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
@@ -113,8 +113,20 @@
     <modules>
         <module>spring-cloud-config-server</module>
         <module>spring-cloud-config-monitor</module>
-        <module>config-server-example</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <!-- Build examples at local, skip build examples on CI -->
+            <id>build-examples</id>
+            <activation><property><name>!site</name></property><activeByDefault>false</activeByDefault></activation>
+            <modules>
+                <module>spring-cloud-config-server</module>
+                <module>spring-cloud-config-monitor</module>
+                <module>config-server-example</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <!-- @formatter:off -->
     <repositories>
