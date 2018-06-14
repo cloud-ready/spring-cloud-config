@@ -12,9 +12,9 @@ spring:
 
 # see: org.springframework.cloud.config.server.config.EncryptionAutoConfiguration
 encrypt:
-  fail-on-error: false # changeme
+  fail-on-error: false # change me
   key-store: # asymmetric encryption
-    alias: ${ENCRYPT_KEYSTORE_ALIAS:key_alias} # changeme
+    alias: ${ENCRYPT_KEYSTORE_ALIAS:key_alias} # change me
     location: ${ENCRYPT_KEYSTORE_LOCATION:classpath:default-keystore.jks}
-    password: ${ENCRYPT_KEYSTORE_PASSWORD:store_pass} # changeme
+    password: ${ENCRYPT_KEYSTORE_PASSWORD:store_pass} # change me
     secret: ${ENCRYPT_KEYSTORE_SECRET:key_pass}

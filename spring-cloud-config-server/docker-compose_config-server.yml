@@ -2,24 +2,10 @@
 version: '2.1'
 services:
   config-server:
-    image: ${DOCKER_REGISTRY:-cloudready}/spring-cloud-config-server:${PROJECT_VERSION:-0.0.1-SNAPSHOT}
-    restart: always
-    command: []
-    container_name: ${INSTANCE_HOSTNAME:-config-server.internal}
-    hostname: ${INSTANCE_HOSTNAME:-config-server.internal}
-    network_mode: host
-
-
-
-
-    ports:
-    - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
-    volumes:
-    - volume-config-server:/tmp
-    - volume-config-server:/root/.data
-    - ${DEPLOY_KEY:-./deploy_key}:/root/.ssh/id_rsa # mount or copy into container
-    - ${DEPLOY_KEY:-./deploy_key}.pub:/root/.ssh/id_rsa.pub # mount or copy into container
-    - ${KEYSTORE:-./keystore.jks}:/root/keystore.jks # mount or copy into container
+    extends:
+      file: docker-compose-base.yml
+      service: base-config-server
+    container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
     environment:
     # encrypt
     - ENCRYPT_KEYSTORE_ALIAS=${ENCRYPT_KEYSTORE_ALIAS:-key_alias} # changeme
@@ -33,7 +19,7 @@ services:
     # eureka
     - EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED:-false}
     - EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-false}
-    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://user:user_pass@eureka.internal:8761/eureka/}
+    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://user:user_pass@eureka-standalone.internal:8761/eureka/}
     - EUREKA_INSTANCE_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.internal}
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
 
@@ -67,9 +53,21 @@ services:
     - SPRING_RABBITMQ_PASSWORD=${SPRING_RABBITMQ_PASSWORD:-user_pass} # changeme
     - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT:-5672}
     - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME:-user} # changeme
-
-
-
+    hostname: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
+    network_mode: bridge
+    ports:
+    - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
+    volumes:
+    - data:/tmp
+    - data:/root/.data
+    - ${DEPLOY_KEY:-./deploy_key}:/root/.ssh/id_rsa # mount or copy into container
+    - ${DEPLOY_KEY:-./deploy_key}.pub:/root/.ssh/id_rsa.pub # mount or copy into container
+    - ${KEYSTORE:-./keystore.jks}:/root/keystore.jks # mount or copy into container
 
 volumes:
-  volume-config-server: {}
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data
+      o: bind

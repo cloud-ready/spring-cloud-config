@@ -1,8 +1,8 @@
 
 logging.level.: ${LOGGING_LEVEL_:INFO}
 logging:
-  file: ${LOGGING_FILE:config-server}.log
-  path: ${LOGGING_PATH:${user.home}/.data/config-server/logs}
+  #file: ${LOG_FILE:${INSTANCE_NAME:${spring.cloud.client.hostname:${spring.application.name}-${server.port}}}}.log
+  #path: ${LOG_PATH:${user.dir}/data/logs/${spring.application.name}}
   level:
     jndi: ${LOGGING_LEVEL_:INFO}
     org.springframework.amqp: ${LOGGING_LEVEL_:INFO}
@@ -18,8 +18,8 @@ logging:
     org.springframework.security: ${LOGGING_LEVEL_:INFO}
 
 management:
-  #port:
   context-path: ${MANAGEMENT_CONTEXTPATH:/manage}
+  #port:
   security:
     enabled: true
     roles: ADMIN # no ROLE_ prefix here
@@ -45,7 +45,7 @@ eureka:
   client:
     enabled: ${EUREKA_CLIENT_ENABLED:true}
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka.local:8761/eureka/}
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka-standalone.local:8761/eureka/}
     register-with-eureka: ${EUREKA_CLIENT_REGISTERWITHEUREKA:true}
   instance:
     health-check-url-path: ${endpoints.health.path:/health}
@@ -54,7 +54,7 @@ eureka:
     lease-renewal-interval-in-seconds: 10
     metadataMap:
       configPath: ${spring.cloud.config.server.prefix}
-    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFERIPADDRESS:false}
     status-page-url-path: ${endpoints.info.path:/info}
     # Registering a Secure Application
     #health-check-url: https://${eureka.instance.hostname}/
@@ -75,7 +75,8 @@ spring:
       auto-multi-registration.enabled: ${SPRING_CLOUD_SERVICEREGISTRY_AUTOREGISTRATION_ENABLED:${spring.cloud.service-registry.auto-registration.enabled:true}}
 
     client.hostname: ${SPRING_CLOUD_CLIENT_HOSTNAME:}
-    client.ip-address: ${SPRING_CLOUD_CLIENT_IP_ADDRESS:}
+    # can not auto determine sometimes. TODO figure out how spring-cloud get this value.
+    #client.ipAddress: ${SPRING_CLOUD_CLIENT_IPADDRESS:}
 
     config:
       # see: org.springframework.cloud.config.monitor.PropertyPathEndpoint
@@ -121,10 +122,15 @@ spring:
       enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
 
     inetutils:
-      ignoredInterfaces:
+      preferred-networks:
+      - ^192\.168
+      - ^10\.
+      - ^172\.
+      ignored-interfaces:
       - docker0
       - eno.*
       - tun.*
+      - utun.*
       - veth.*
       - virbr.*
 
