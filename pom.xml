@@ -99,9 +99,6 @@
 
     <dependencies>
         <!-- @formatter:off -->
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-rolling</artifactId></dependency>
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-test</artifactId><scope>test</scope></dependency>
-
         <dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId></dependency>
         <dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId></dependency>
         <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>
