@@ -100,9 +100,7 @@ spring:
           force-pull: true
           known-hosts-file: ${SPRING_CLOUD_CONFIG_SERVER_GIT_KNOWNHOSTSFILE:/dev/null}
           parent-support-enabled: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PARENTSUPPORTENABLED:true} # custom property: parent-support-enabled
-          search-paths:
-          - 'label-{label}'
-          - 'profile-{profile}'
+          search-paths: ${AUTH_CONFIG_SEARCHPATHS:auth-label-{label},auth-profile-{profile}}
           strict-host-key-checking: ${SPRING_CLOUD_CONFIG_SERVER_GIT_STRICTHOSTKEYCHECKING:false}
           timeout: 30
           #uri: ${GIT_PREFIX:ssh://git@gitlab.local:20022/spring-cloud-config-server}/{application}-config.git

@@ -2,11 +2,13 @@
 version: '2.1'
 services:
   base-config-server:
-    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.1}
+    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.2}
     command: []
 
 
     environment:
+    - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
+
     # encrypt
     - ENCRYPT_KEYSTORE_ALIAS=${ENCRYPT_KEYSTORE_ALIAS:-key_alias} # changeme
     - ENCRYPT_KEYSTORE_LOCATION=${ENCRYPT_KEYSTORE_LOCATION:-classpath:default-keystore.jks}

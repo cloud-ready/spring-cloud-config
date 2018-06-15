@@ -7,6 +7,8 @@ services:
       service: base-config-server
     container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
     environment:
+    - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
+
     # encrypt
     - ENCRYPT_KEYSTORE_ALIAS=${ENCRYPT_KEYSTORE_ALIAS:-key_alias} # changeme
     - ENCRYPT_KEYSTORE_LOCATION=${ENCRYPT_KEYSTORE_LOCATION:-file:/root/keystore.jks}
