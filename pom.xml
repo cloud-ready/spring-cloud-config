@@ -15,7 +15,7 @@
     <name>spring-cloud-config</name>
     <packaging>pom</packaging>
     <url>https://github.com/cloud-ready/spring-cloud-config</url>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 
     <ciManagement>
         <system>Travis CI</system>
@@ -35,8 +35,8 @@
         <deps-spring-boot.version>0.0.4.OSS</deps-spring-boot.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
-        <log-config.version>0.0.4.OSS</log-config.version>
-        <service-discovery.version>0.0.1</service-discovery.version>
+        <log-config.version>0.0.5.OSS</log-config.version>
+        <service-discovery.version>0.0.3</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
         <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
@@ -99,9 +99,6 @@
 
     <dependencies>
         <!-- @formatter:off -->
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-rolling</artifactId></dependency>
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-test</artifactId><scope>test</scope></dependency>
-
         <dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId></dependency>
         <dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId></dependency>
         <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>
