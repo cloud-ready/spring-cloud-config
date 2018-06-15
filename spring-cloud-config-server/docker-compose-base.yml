@@ -2,7 +2,7 @@
 version: '2.1'
 services:
   base-config-server:
-    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.2}
+    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.3}
     command: []
 
 

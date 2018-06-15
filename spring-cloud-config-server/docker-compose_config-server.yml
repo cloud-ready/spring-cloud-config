@@ -61,7 +61,7 @@ services:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     volumes:
     - data:/tmp
-    - data:/root/.data
+    - data:/root/data
     - ${DEPLOY_KEY:-./deploy_key}:/root/.ssh/id_rsa # mount or copy into container
     - ${DEPLOY_KEY:-./deploy_key}.pub:/root/.ssh/id_rsa.pub # mount or copy into container
     - ${KEYSTORE:-./keystore.jks}:/root/keystore.jks # mount or copy into container
