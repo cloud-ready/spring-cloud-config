@@ -35,7 +35,7 @@
         <deps-spring-boot.version>0.0.4.OSS</deps-spring-boot.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
-        <log-config.version>0.0.4.OSS</log-config.version>
+        <log-config.version>0.0.5.OSS</log-config.version>
         <service-discovery.version>0.0.1</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
