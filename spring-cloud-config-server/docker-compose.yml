@@ -7,6 +7,8 @@ services:
       service: base-config-server
     container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-local}
     environment:
+    - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
+
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
     - SERVER_PORT=${SERVER_PORT:-8888}
 

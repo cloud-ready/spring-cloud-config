@@ -122,7 +122,7 @@ Note:
 + It is recommended to use a encrypted `spring.cloud.config.parent.password` in config file.
 + Do not use a plain text parent password or password encrypted by  `/encrypt` endpoint.
 > Anyone who copied it will get privilege to access parent config repository.
-+ You can use different `spring.cloud.config.parent.password` in label-develop, profile-staging, profile-production configs to protect sensible properties.
++ You can use different `spring.cloud.config.parent.password` in auth-label-develop, auth-profile-staging.env, auth-profile-production.env configs to protect sensible properties.
 > If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
 > i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
 + Use `/encryptParentPassword` to generate a encrypted and signed parent password (token), only admin can do this.
@@ -154,7 +154,7 @@ curl -s -X GET -u demo-app:demo-app_pass http://config-server.local:8888/config/
 
 Note:
 + config-server support load `spring.cloud.config.password` form environment profiles or default profile.
-+ You can use different `spring.cloud.config.password` in label-develop, profile-staging, profile-production configs to protect sensible properties.
++ You can use different `spring.cloud.config.password` in auth-label-develop, auth-profile-staging.env, auth-profile-production.env configs to protect sensible properties.
 > If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
 > i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
 + config-server will use parent's `spring.cloud.config.password` if child's `spring.cloud.config.password` absent and it has a parent.
