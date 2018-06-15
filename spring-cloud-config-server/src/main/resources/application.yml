@@ -179,7 +179,7 @@ spring:
 
 ---
 spring:
-  profiles: development.env
+  profiles: develop.env
 
 ---
 spring:
