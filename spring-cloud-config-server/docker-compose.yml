@@ -1,13 +1,16 @@
 
 version: '2.1'
 services:
-  config-server:
-    image: ${DOCKER_REGISTRY:-cloudready}/spring-cloud-config-server:${PROJECT_VERSION:-0.0.1-SNAPSHOT}
-    restart: always
-    command: []
-    container_name: ${INSTANCE_HOSTNAME:-config-server.local}
-    hostname: ${INSTANCE_HOSTNAME:-config-server.local}
-    #network_mode: host
+  config-server-develop:
+    extends:
+      file: docker-compose-base.yml
+      service: base-config-server
+    container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-local}
+    environment:
+    - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
+    - SERVER_PORT=${SERVER_PORT:-8888}
+
+    hostname: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-local}
     networks:
       local-network:
         ipv4_address: 172.16.238.18
@@ -15,84 +18,24 @@ services:
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     volumes:
-    - volume-config-server:/tmp
-    - volume-config-server:/root/.data
-
-
-
-    environment:
-    # encrypt
-    - ENCRYPT_KEYSTORE_ALIAS=${ENCRYPT_KEYSTORE_ALIAS:-key_alias} # changeme
-    - ENCRYPT_KEYSTORE_LOCATION=${ENCRYPT_KEYSTORE_LOCATION:-classpath:default-keystore.jks}
-    - ENCRYPT_KEYSTORE_PASSWORD=${ENCRYPT_KEYSTORE_PASSWORD:-store_pass} # store password # changeme
-    - ENCRYPT_KEYSTORE_SECRET=${ENCRYPT_KEYSTORE_SECRET:-key_pass} # key password # changeme
-
-    # sensitive: false only show UP or DOWN, no details, but need not to authenticate.
-    - ENDPOINTS_HEALTH_SENSITIVE=${ENDPOINTS_HEALTH_SENSITIVE:-false}
-
-    # eureka
-    - EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED:-false}
-    - EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-false}
-    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://user:user_pass@eureka.local:8761/eureka/}
-    - EUREKA_INSTANCE_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.local}
-    - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
-
-    # config-server
-    - GIT_PREFIX=${GIT_PREFIX:-https://github.com:443/spring-cloud-config-server}
-    #- GIT_PREFIX=${GIT_PREFIX:-ssh://git@github.com:22/spring-cloud-config-server}
-
-    - SECURITY_USER_PASSWORD=${SECURITY_USER_PASSWORD:-admin_pass}
-    - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
-    - SERVER_PORT=${SERVER_PORT:-8888}
-    - SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET=${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:-secret}
-    - SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY=${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:-classpath:default-deploy_key} # changeme
-    - SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL=${SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL:-develop}
-    - SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE=${SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE:-default}
-    - SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED=${SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED:-false}
-    - SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITHUB_ENABLED=${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITHUB_ENABLED:-false}
-    - SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED=${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED:-false}
-    - SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLAB_ENABLED=${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLAB_ENABLED:-false}
-
-    # consul
-    - SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED=${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:-false}
-    - SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.local}
-    - SPRING_CLOUD_CONSUL_ENABLED=${SPRING_CLOUD_CONSUL_ENABLED:-false}
-    - SPRING_CLOUD_CONSUL_HOST=${SPRING_CLOUD_CONSUL_HOST:-consul.local}
-    - SPRING_CLOUD_CONSUL_PORT=${SPRING_CLOUD_CONSUL_PORT:-8500}
-
-    - SPRING_PROFILES_ACTIVE=${ENV:-development}.env,port_nonsecure
-
-    # monitor/rabbitmq
-    - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST:-} # changeme
-    - SPRING_RABBITMQ_PASSWORD=${SPRING_RABBITMQ_PASSWORD:-user_pass} # changeme
-    - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT:-5672}
-    - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME:-user} # changeme
-    #external_links:
-    #- oss-eureka.local:oss-eureka.local
-    #- cloudbus.local:cloudbus.local
-
-volumes:
-  volume-config-server: {}
+    - data:/tmp
+    - data:/root/.data
 
 networks:
-  default:
-    external: true
-    name: local-network
-
   local-network:
     external: true
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+      - subnet: 2001:3984:3989::/64
 
-#  # docker network create --driver=bridge --ipv6 --ipam-driver=default --subnet=172.16.238.0/24 --subnet=2001:3984:3989::/64 local-network
-#  # docker network ls
-#  # docker network inspect local-network
-#  local-network:
-#    external: true
-#    driver: bridge
-#    enable_ipv6: true
-#    ipam:
-#      driver: default
-#      config:
-#      -
-#        subnet: 172.16.238.0/24
-#      -
-#        subnet: 2001:3984:3989::/64
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data
+      o: bind
