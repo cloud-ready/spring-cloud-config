@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PRIVATE)
 public abstract class Consts {
 
-  public static final String DATA_DIRECTORY = System.getProperty("user.home") + "/.data/config-server";
+  public static final String DATA_DIRECTORY = System.getProperty("user.home") + "/data/config-server";
 
   public static final String DOT_ENV = ".env";
 
