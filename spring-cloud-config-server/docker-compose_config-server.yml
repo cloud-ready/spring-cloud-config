@@ -55,6 +55,7 @@ services:
     - SPRING_RABBITMQ_PASSWORD=${SPRING_RABBITMQ_PASSWORD:-user_pass} # changeme
     - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT:-5672}
     - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME:-user} # changeme
+
     hostname: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
     network_mode: bridge
     ports:
