@@ -59,7 +59,7 @@ services:
     #- eureka-standalone.local:eureka-standalone.local
     #- cloudbus.local:cloudbus.local
 
-    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.5}
+    image: ${IMAGE_PREFIX:-cloudready}/spring-cloud-config-server:${IMAGE_VERSION:-0.0.6-SNAPSHOT}
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     restart: always
