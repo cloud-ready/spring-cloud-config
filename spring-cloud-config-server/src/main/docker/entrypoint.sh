@@ -37,7 +37,7 @@ if [ ! -z "${SPRING_RABBITMQ_HOST}" ] && [ ! -z "${SPRING_RABBITMQ_PORT}" ]; the
 
 
 JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/urandom";
-JAVA_OPTS="${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}";
+if [ -n "${SPRING_PROFILES_ACTIVE}" ]; then JAVA_OPTS="${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}"; fi
 . /opt/java_debug_monitor_profiler.sh
 
 # if command starts with an option, prepend java
