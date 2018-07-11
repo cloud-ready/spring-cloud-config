@@ -3,10 +3,10 @@
 ## I. Repository locations
 
 ### 1.Global config repository for all projects of organization
-git@{git-service}:spring-cloud-config-server/{organization}-global-config.git
+git@${git-service}:spring-cloud-config-server/${organization}-global-config.git
 
 ### 2.Project config repositories
-git@{git-service}:spring-cloud-config-server/{project}-config.git
+git@${git-service}:spring-cloud-config-server/${spring.application.name}-config.git
 
 
 ## II. Branch model
