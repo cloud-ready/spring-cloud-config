@@ -1,20 +1,20 @@
 
-logging.level.: ${LOGGING_LEVEL_:INFO}
 logging:
 #  path: ${LOGGING_PATH:${LOG_PATH:${user.dir}/data/logs/${spring.application.name}}}
   level:
-    jndi: ${LOGGING_LEVEL_:INFO}
-    org.springframework.amqp: ${LOGGING_LEVEL_:INFO}
-    org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor: ${LOGGING_LEVEL_:WARN}
-    org.springframework.beans.factory.annotation.InjectionMetadata: ${LOGGING_LEVEL_:INFO}
-    org.springframework.beans.factory.support.DefaultListableBeanFactory: ${LOGGING_LEVEL_:INFO}
-    org.springframework.core.env.MutablePropertySources: ${LOGGING_LEVEL_:INFO}
-    org.springframework.core.env.PropertySourcesPropertyResolver: ${LOGGING_LEVEL_:INFO}
+    jndi: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.amqp: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor: ${LOGGING_LEVEL_ROOT:WARN}
+    org.springframework.beans.factory.annotation.InjectionMetadata: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.beans.factory.support.DefaultListableBeanFactory: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.core.env.MutablePropertySources: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.core.env.PropertySourcesPropertyResolver: ${LOGGING_LEVEL_ROOT:INFO}
     org.springframework.core.type.classreading.AnnotationAttributesReadingVisitor: INFO
-    org.springframework.context.annotation.AnnotationConfigApplicationContext: ${LOGGING_LEVEL_:WARN}
-    org.springframework.jndi: ${LOGGING_LEVEL_:INFO}
-    org.springframework.web.context.support.StandardServletEnvironment: ${LOGGING_LEVEL_:INFO}
-    org.springframework.security: ${LOGGING_LEVEL_:INFO}
+    org.springframework.context.annotation.AnnotationConfigApplicationContext: ${LOGGING_LEVEL_ROOT:WARN}
+    org.springframework.jndi: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.web.context.support.StandardServletEnvironment: ${LOGGING_LEVEL_ROOT:INFO}
+    org.springframework.security: ${LOGGING_LEVEL_ROOT:INFO}
+    root: ${LOGGING_LEVEL_ROOT:INFO}
 
 management:
   context-path: ${MANAGEMENT_CONTEXTPATH:/manage}
