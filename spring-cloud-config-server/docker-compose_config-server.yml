@@ -5,7 +5,7 @@ services:
     extends:
       file: docker-compose-base.yml
       service: base-config-server
-    container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
+    container_name: ${CONTAINER_HOST_NAME:-config-server}
     environment:
     - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
 
@@ -61,7 +61,7 @@ services:
     - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT:-5672}
     - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME:-user} # changeme
 
-    hostname: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-internal}
+    hostname: ${CONTAINER_HOST_NAME:-config-server}
     network_mode: bridge
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"

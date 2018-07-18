@@ -5,7 +5,7 @@ services:
     extends:
       file: docker-compose-base.yml
       service: base-config-server
-    container_name: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-local}
+    container_name: ${CONTAINER_HOST_NAME:-config-server}
     environment:
     - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
 
@@ -15,7 +15,7 @@ services:
 
     - SERVER_PORT=${SERVER_PORT:-8888}
 
-    hostname: ${INSTANCE_NAME:-config-server}.${INSTANCE_DOMAIN:-local}
+    hostname: ${CONTAINER_HOST_NAME:-config-server}
     networks:
       local-network:
         ipv4_address: 172.16.238.18
