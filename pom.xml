@@ -15,7 +15,7 @@
     <name>spring-cloud-config</name>
     <packaging>pom</packaging>
     <url>https://github.com/cloud-ready/spring-cloud-config</url>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <ciManagement>
         <system>Travis CI</system>
