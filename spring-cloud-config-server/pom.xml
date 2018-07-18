@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.home1</groupId>
         <artifactId>spring-cloud-config</artifactId>
-        <version>0.0.5</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>spring-cloud-config-server</artifactId>
@@ -38,14 +38,14 @@
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-configuration-processor</artifactId></dependency>
         <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-eureka</artifactId></dependency>
         <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-consul-all</artifactId></dependency>
-        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId><scope>runtime</scope></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId><scope>runtime</scope></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-undertow</artifactId><scope>runtime</scope></dependency>
 
         <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId></dependency>
 
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-rolling</artifactId></dependency>
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-test</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-rolling-config</artifactId></dependency>
+        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-test-config</artifactId><scope>test</scope></dependency>
         <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><scope>runtime</scope></dependency>
 
         <dependency><groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId></dependency>

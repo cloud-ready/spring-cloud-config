@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.home1</groupId>
         <artifactId>maven-build-java8</artifactId>
-        <version>0.0.3.OSS</version>
+        <version>0.0.6.OSS</version>
     </parent>
 
     <artifactId>spring-cloud-config</artifactId>
@@ -15,7 +15,7 @@
     <name>spring-cloud-config</name>
     <packaging>pom</packaging>
     <url>https://github.com/cloud-ready/spring-cloud-config</url>
-    <version>0.0.5</version>
+    <version>1.0.0</version>
 
     <ciManagement>
         <system>Travis CI</system>
@@ -32,11 +32,11 @@
     </scm>
 
     <properties>
-        <deps-spring-boot.version>0.0.4.OSS</deps-spring-boot.version>
+        <deps-spring-boot.version>0.0.7.OSS</deps-spring-boot.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
-        <log-config.version>0.0.5.OSS</log-config.version>
-        <service-discovery.version>0.0.3</service-discovery.version>
+        <log-config.version>0.0.8.OSS</log-config.version>
+        <service-discovery.version>1.0.0</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
         <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
@@ -87,8 +87,8 @@
             </dependency>
 
             <!-- @formatter:off -->
-            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-rolling</artifactId><version>${log-config.version}</version></dependency>
-            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-config-test</artifactId><version>${log-config.version}</version><scope>test</scope></dependency>
+            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-rolling-config</artifactId><version>${log-config.version}</version></dependency>
+            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-test-config</artifactId><version>${log-config.version}</version><scope>test</scope></dependency>
             <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>${service-discovery.version}</version></dependency>
 
             <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId><version>${java-jwt.version}</version></dependency>
