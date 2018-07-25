@@ -32,7 +32,7 @@
     </scm>
 
     <properties>
-        <deps-spring-boot.version>0.0.7.OSS</deps-spring-boot.version>
+        <deps-spring-boot.version>0.0.8.OSS-SNAPSHOT</deps-spring-boot.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
         <log-config.version>0.0.8.OSS</log-config.version>

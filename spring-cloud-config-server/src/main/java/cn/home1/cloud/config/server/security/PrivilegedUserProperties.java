@@ -1,13 +1,17 @@
 package cn.home1.cloud.config.server.security;
 
+import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +21,9 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class PrivilegedUserProperties {
 
-  @Value("${security.user.name:admin}")
-  private String adminName;
-
-  @Value("${security.user.password:}")
-  private String adminPassword;
+  @Autowired
+  @Getter(value = PRIVATE)
+  private SecurityProperties securityProperties;
 
   @Value("${security.hook.name:hook}")
   private String hookName;
@@ -29,11 +31,23 @@ public class PrivilegedUserProperties {
   @Value("${security.hook.password:hook_pass}")
   private String hookPassword;
 
+  public String getAdminName() {
+    return this.securityProperties.getUser().getName();
+  }
+
+  public String getAdminPassword() {
+    return this.securityProperties.getUser().getPassword();
+  }
+
+  public List<String> getAdminRoles() {
+    return this.securityProperties.getUser().getRole();
+  }
+
   @PostConstruct
   private void init() {
-    if (isBlank(this.adminPassword)) {
-      this.adminPassword = UUID.randomUUID().toString();
-      log.info("auto generated admin password, username:{}, password:{}", this.adminName, this.adminPassword);
+    if (isBlank(this.getAdminPassword())) {
+      this.securityProperties.getUser().setPassword(UUID.randomUUID().toString());
+      log.info("auto generated admin password, username:{}, password:{}", this.getAdminName(), this.getAdminPassword());
     }
 
     if (isBlank(this.hookPassword)) {

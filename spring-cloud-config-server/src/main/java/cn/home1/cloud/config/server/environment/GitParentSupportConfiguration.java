@@ -17,9 +17,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 @Configuration
 public class GitParentSupportConfiguration {
 
-  @Autowired
-  private ConfigSecurity configSecurity;
-
   @Value("${spring.cloud.config.server.default-label:master}")
   private String defaultLabel;
 
@@ -42,12 +39,17 @@ public class GitParentSupportConfiguration {
   private TransportConfigCallback transportConfigCallback;
 
   @Bean
+  public ConfigSecurity configSecurity() {
+    return new ConfigSecurity();
+  }
+
+  @Bean
   @ConditionalOnMissingBean(EnvironmentRepository.class)
   public EnvironmentRepository environmentRepository() {
     final GitParentSupportMultipleJGitEnvironmentRepository repository =
         new GitParentSupportMultipleJGitEnvironmentRepository(this.environment);
 
-    repository.setConfigSecurity(this.configSecurity);
+    repository.setConfigSecurity(this.configSecurity());
 
     repository.setDefaultLabel(this.defaultLabel);
     repository.setDeleteUntrackedBranches(this.deleteUntrackedBranches);

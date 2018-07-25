@@ -66,9 +66,12 @@ public class PrivilegedUserPropertiesTest {
     this.host = "http://localhost:" + port;
     log.info(host);
 
-    firstAppAuthHttpEntity = structHttpEntityWithAuthHeaders(firstAppName, firstAppPassword);
+    this.firstAppAuthHttpEntity = structHttpEntityWithAuthHeaders(this.firstAppName, this.firstAppPassword);
 
-    adminAuthHttpEntity = structHttpEntityWithAuthHeaders(privilegedUserProperties.getAdminName(), privilegedUserProperties.getAdminPassword());
+    this.adminAuthHttpEntity = structHttpEntityWithAuthHeaders( //
+        this.privilegedUserProperties.getAdminName(),
+        this.privilegedUserProperties.getAdminPassword()
+    );
   }
 
   private <T> HttpEntity<T> structHttpEntityWithAuthHeaders(final String name, final String password) {

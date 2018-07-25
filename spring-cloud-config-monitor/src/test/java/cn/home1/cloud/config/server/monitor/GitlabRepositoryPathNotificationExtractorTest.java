@@ -71,7 +71,7 @@ public class GitlabRepositoryPathNotificationExtractorTest {
     payload.put("commits", newArrayList( //
         ImmutableMap.of( //
             "url", //
-            "http://gitlab.internal/home1-oss/" //
+            "http://gitlab/home1-oss/" //
                 + repository //
                 + "/commit/929f67f2b38a6269e7ad63f606c9d89a7d8eb79f" //
         )

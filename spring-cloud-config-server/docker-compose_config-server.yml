@@ -11,7 +11,7 @@ services:
 
     # encrypt
     - ENCRYPT_KEYSTORE_ALIAS=${ENCRYPT_KEYSTORE_ALIAS:-key_alias} # changeme
-    - ENCRYPT_KEYSTORE_LOCATION=${ENCRYPT_KEYSTORE_LOCATION:-file:/root/keystore.jks}
+    - ENCRYPT_KEYSTORE_LOCATION=${ENCRYPT_KEYSTORE_LOCATION:-file:/home/alpine/keystore.jks}
     - ENCRYPT_KEYSTORE_PASSWORD=${ENCRYPT_KEYSTORE_PASSWORD:-store_pass} # store password # changeme
     - ENCRYPT_KEYSTORE_SECRET=${ENCRYPT_KEYSTORE_SECRET:-key_pass} # key password # changeme
 
@@ -21,24 +21,23 @@ services:
     # eureka
     - EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED:-false}
     - EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-false}
-    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://user:user_pass@eureka-standalone.internal:8761/eureka/}
-    - EUREKA_INSTANCE_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.internal}
+    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://user:user_pass@eureka-standalone:8761/eureka/}
+    - EUREKA_INSTANCE_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server}
     - EUREKA_INSTANCE_IPADDRESS:${EUREKA_INSTANCE_IPADDRESS}
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
 
     # config-server
-    #- GIT_PREFIX=${GIT_PREFIX:-https://gitlab.internal:443/spring-cloud-config-server}
-    - GIT_PREFIX=${GIT_PREFIX:-ssh://git@gitlab.internal:22/spring-cloud-config-server}
+    #- GIT_PREFIX=${GIT_PREFIX:-https://gitlab:443/spring-cloud-config-server}
+    - GIT_PREFIX=${GIT_PREFIX:-ssh://git@gitlab:22/spring-cloud-config-server}
 
-    - SECURITY_USER_PASSWORD=${SECURITY_USER_PASSWORD:-admin_pass}
-    - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
     - SERVER_PORT=${SERVER_PORT:-8888}
 
-    - SPRING_CLOUD_CLIENT_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.internal}
+    - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
+    - SPRING_CLOUD_CLIENT_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server}
     - SPRING_CLOUD_CLIENT_IPADDRESS=${SPRING_CLOUD_CLIENT_IPADDRESS}
 
-    - SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET=${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:-secret}
-    - SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY=${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:-file:/root/.ssh/id_rsa} # changeme
+    - SPRING_CLOUD_CONFIG_SERVER_ENCRYPT_HMACSECRET=${SPRING_CLOUD_CONFIG_SERVER_ENCRYPT_HMACSECRET:-secret}
+    - SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY=${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:-file:/home/alpine/.ssh/id_rsa} # changeme
     - SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL=${SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL:-master}
     - SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE=${SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE:-default}
     - SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED=${SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED:-false}
@@ -48,12 +47,16 @@ services:
 
     # consul
     - SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED=${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:-false}
-    - SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server.internal}
+    - SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-config-server}
     - SPRING_CLOUD_CONSUL_ENABLED=${SPRING_CLOUD_CONSUL_ENABLED:-false}
-    - SPRING_CLOUD_CONSUL_HOST=${SPRING_CLOUD_CONSUL_HOST:-consul.internal}
+    - SPRING_CLOUD_CONSUL_HOST=${SPRING_CLOUD_CONSUL_HOST:-consul}
     - SPRING_CLOUD_CONSUL_PORT=${SPRING_CLOUD_CONSUL_PORT:-8500}
 
+
+
+
     - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-development.env,manual_ip_hostname,port_nonsecure}
+    - SPRING_SECURITY_USER_PASSWORD=${SPRING_SECURITY_USER_PASSWORD:-admin_pass}
 
     # monitor/rabbitmq
     - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST:-} # changeme
@@ -66,16 +69,22 @@ services:
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     volumes:
-    - data:/tmp
-    - data:/root/data
-    - ${DEPLOY_KEY:-./deploy_key}:/root/.ssh/id_rsa # mount or copy into container
-    - ${DEPLOY_KEY:-./deploy_key}.pub:/root/.ssh/id_rsa.pub # mount or copy into container
-    - ${KEYSTORE:-./keystore.jks}:/root/keystore.jks # mount or copy into container
+    - data:/home/alpine/data
+    #- tmp:/tmp
+    - ${DEPLOY_KEY:-./deploy_key}:/home/alpine/.ssh/id_rsa # mount or copy into container
+    - ${DEPLOY_KEY:-./deploy_key}.pub:/home/alpine/.ssh/id_rsa.pub # mount or copy into container
+    - ${KEYSTORE:-./keystore.jks}:/home/alpine/keystore.jks # mount or copy into container
 
 volumes:
   data:
     driver: local
     driver_opts:
       type: none
-      device: ${PWD}/data
+      device: ${PWD}/data/data
+      o: bind
+  tmp:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/tmp
       o: bind

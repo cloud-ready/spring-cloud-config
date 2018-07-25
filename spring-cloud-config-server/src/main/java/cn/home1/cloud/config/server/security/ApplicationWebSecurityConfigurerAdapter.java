@@ -23,7 +23,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 @Configuration
 @EnableWebSecurity
 @Order(ACCESS_OVERRIDE_ORDER)
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private ConfigSecurity configSecurity;

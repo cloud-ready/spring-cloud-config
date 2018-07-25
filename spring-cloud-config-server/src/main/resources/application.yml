@@ -14,37 +14,38 @@ logging:
     org.springframework.jndi: ${LOGGING_LEVEL_ROOT:INFO}
     org.springframework.web.context.support.StandardServletEnvironment: ${LOGGING_LEVEL_ROOT:INFO}
     org.springframework.security: ${LOGGING_LEVEL_ROOT:INFO}
-    root: ${LOGGING_LEVEL_ROOT:INFO}
+    root: ${LOGGING_LEVEL_ROOT:DEBUG}
 
 management:
-  context-path: ${MANAGEMENT_CONTEXTPATH:/manage}
+  context-path: ${MANAGEMENT_CONTEXTPATH:/actuator}
   #port:
   security:
     enabled: true
-    roles: ADMIN # no ROLE_ prefix here
+    roles: ACTUATOR # no ROLE_ prefix here
 
 # consul needs endpoint.health to check service status,
 # set sensitive to false will hide detailed infos but need not to authenticate.
 endpoints.health.sensitive: ${ENDPOINTS_HEALTH_SENSITIVE:false}
 
 security:
-  basic.enabled: ${SECURITY_BASIC_ENABLED:true}
+  basic.enabled: ${SPRING_SECURITY_ENABLED:true}
   user:
     name: ${SECURITY_USER_NAME:admin}
-    password: ${SECURITY_USER_PASSWORD:admin_pass}
+    password: ${SPRING_SECURITY_USER_PASSWORD:admin_pass}
+    role: ${SPRING_SECURITY_USER_ROLES:ACTUATOR, ADMIN, SUPERUSER, USER}
   hook:
-    name: ${SECURITY_HOOK_NAME:hook}
-    password: ${SECURITY_HOOK_PASSWORD:hook_pass}
+    name: ${SPRING_SECURITY_HOOK_NAME:hook}
+    password: ${SPRING_SECURITY_HOOK_PASSWORD:hook_pass}
 
 server:
-  context-path: ${SERVER_CONTEXTPATH:}
+  context-path: ${SERVER_CONTEXTPATH:} # deprecated since spring-boot 2.x
   port: ${SERVER_PORT:8888}
 
 eureka:
   client:
     enabled: ${EUREKA_CLIENT_ENABLED:true}
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka-standalone.local:8761/eureka/}
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka-standalone:8761/eureka/}
     register-with-eureka: ${EUREKA_CLIENT_REGISTERWITHEUREKA:true}
   instance:
     health-check-url-path: ${endpoints.health.path:/health}
@@ -81,24 +82,24 @@ spring:
         default-label: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTLABEL:master}
         default-profile: ${SPRING_CLOUD_CONFIG_SERVER_DEFAULTPROFILE:default}
         encrypt:
-          hmac-secret: ${SPRING_CLOUD_CONFIG_ENCRYPT_HMACSECRET:secret} # custom property: hmac-secret
-          enabled: true
+          hmac-secret: ${SPRING_CLOUD_CONFIG_SERVER_ENCRYPT_HMACSECRET:secret} # custom property: hmac-secret
+          enabled: ${SPRING_CLOUD_CONFIG_SERVER_ENCRYPT_ENABLED:true}
         health.repositories: # default is 'app'
           health-check-repository:
-            name: health-check
+            name: ${SPRING_CLOUD_CONFIG_SERVER_HEALTH_REPOSITORIES_HEALTHCHECKREPOSITORY:health-check}
         git:
-          clone-on-start: false
-          delete-untracked-branches: true
+          clone-on-start: ${SPRING_CLOUD_CONFIG_SERVER_GIT_CLONEONSTART:false}
+          delete-untracked-branches: ${SPRING_CLOUD_CONFIG_SERVER_GIT_DELETEUNTRACKEDBRANCHES:true}
           deploy-key: ${SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY:classpath:default-deploy_key} # custom property: deploy-key
           # Property 'spring.cloud.config.server.git.privateKey' must be set when 'spring.cloud.config.server.git.ignoreLocalSshSettings' is specified
           #ignore-local-ssh-settings: ${SPRING_CLOUD_CONFIG_SERVER_GIT_IGNORELOCALSSHSETTINGS:true}
-          force-pull: true
+          force-pull: ${SPRING_CLOUD_CONFIG_SERVER_GIT_FORCEPULL:true}
           known-hosts-file: ${SPRING_CLOUD_CONFIG_SERVER_GIT_KNOWNHOSTSFILE:/dev/null}
           parent-support-enabled: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PARENTSUPPORTENABLED:true} # custom property: parent-support-enabled
           search-paths: ${AUTH_CONFIG_SEARCHPATHS:auth-label-{label},auth-profile-{profile}}
           strict-host-key-checking: ${SPRING_CLOUD_CONFIG_SERVER_GIT_STRICTHOSTKEYCHECKING:false}
-          timeout: 30
-          #uri: ${GIT_PREFIX:ssh://git@gitlab.local:20022/spring-cloud-config-server}/{application}-config.git
+          timeout: ${SPRING_CLOUD_CONFIG_SERVER_GIT_TIMEOUT:30}
+          #uri: ${GIT_PREFIX:ssh://git@gitlab:20022/spring-cloud-config-server}/{application}-config.git
           uri: ${GIT_PREFIX:https://github.com/spring-cloud-config-server}/{application}-config.git
         # see: org.springframework.cloud.config.monitor.EnvironmentMonitorAutoConfiguration
         monitor:
@@ -106,7 +107,7 @@ spring:
           github.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITHUB_ENABLED:false}
           gitlab.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLAB_ENABLED:false}
           gitlabrepo.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_GITLABREPO_ENABLED:false} # custom property: gitlabrepo.enabled
-        prefix: /config
+        prefix: ${SPRING_CLOUD_CONFIG_SERVER_PREFIX:/config}
     consul:
       discovery:
         enabled: ${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:true}
@@ -117,21 +118,12 @@ spring:
       enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
 
     inetutils:
-      preferred-networks:
-      - ^192\.168\.
-      - ^10\.
-      - ^172\.
-      ignored-interfaces:
-      - docker0
-      - eno.*
-      - tun.*
-      - utun.*
-      - veth.*
-      - virbr.*
+      preferred-networks: ${SPRING_CLOUD_INETUTILS_PREFERREDNETWORKS:^192\.168\..+, ^172\.30\..+, ^10\..+}
+      ignored-interfaces: ${SPRING_CLOUD_INETUTILS_IGNOREDINTERFACES:^[a-z]?tun[0-9]*, ^awdl[0-9]*, ^lo[0-9]*}
 
 #spring:
 #  rabbitmq:
-#    host: ${SPRING_RABBITMQ_HOST:cloudbus.local}
+#    host: ${SPRING_RABBITMQ_HOST:cloudbus}
 #    port: ${SPRING_RABBITMQ_PORT:5672}
 #    username: ${SPRING_RABBITMQ_USERNAME:user}
 #    password: ${SPRING_RABBITMQ_PASSWORD:user_pass}

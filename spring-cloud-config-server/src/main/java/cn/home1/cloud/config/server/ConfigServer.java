@@ -22,7 +22,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.config.server.EnableConfigServer;
 import org.springframework.cloud.config.server.config.ConfigServerHealthIndicator;
-import org.springframework.cloud.config.server.config.TransportConfiguration;
+import org.springframework.cloud.config.server.config.TransportConfiguration.FileBasedSshTransportConfigCallback;
+import org.springframework.cloud.config.server.config.TransportConfiguration.PropertiesBasedSshTransportConfigCallback;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
 import org.springframework.cloud.config.server.ssh.SshUriProperties;
 import org.springframework.context.annotation.Bean;
@@ -84,11 +85,6 @@ public class ConfigServer {
   @EnableDiscoveryClient
   protected class ConfigServerConfiguration {
 
-    @Bean
-    public ConfigSecurity configSecurity() {
-      return new ConfigSecurity();
-    }
-
     /**
      * see: {@link org.springframework.cloud.config.server.config.TransportConfiguration}
      */
@@ -97,9 +93,9 @@ public class ConfigServer {
     public TransportConfigCallback propertiesBasedSshTransportCallback(final SshUriProperties sshUriProperties) {
       if (ConfigServer.DEPLOY_KEY != null) {
         DEPLOY_KEY.setUp(sshUriProperties);
-        return new TransportConfiguration.PropertiesBasedSshTransportConfigCallback(sshUriProperties);
+        return new PropertiesBasedSshTransportConfigCallback(sshUriProperties);
       } else {
-        return new TransportConfiguration.FileBasedSshTransportConfigCallback(sshUriProperties);
+        return new FileBasedSshTransportConfigCallback(sshUriProperties);
       }
     }
   }

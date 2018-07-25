@@ -4,6 +4,7 @@ import static cn.home1.cloud.config.server.util.Consts.DOT_ENV;
 import static cn.home1.cloud.config.server.util.Consts.PRIVILEGE_ENV_PROFILE_;
 import static cn.home1.cloud.config.server.util.Consts.PRIVILEGE_ENV_PROFILE_WILDCARD;
 import static cn.home1.cloud.config.server.util.EnvironmentUtils.getConfigPassword;
+import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.ImmutableList;
 
@@ -35,9 +36,6 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
 
   private static final Collection<? extends GrantedAuthority> ANONYMOUS_AUTHORITY = ImmutableList.of();
 
-  private static final Collection<? extends GrantedAuthority> ADMIN_AUTHORITY =
-      ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.ADMIN.toString()));
-
   private static final Collection<? extends GrantedAuthority> HOOK_AUTHORITY =
       ImmutableList.of(new SimpleGrantedAuthority("ROLE_" + Role.HOOK.toString()));
 
@@ -54,7 +52,7 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
   private EnvironmentController environmentController;
 
   @Setter
-  private PrivilegedUserProperties PrivilegedUserProperties;
+  private PrivilegedUserProperties privilegedUserProperties;
 
   @Override
   public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
@@ -62,12 +60,14 @@ public class GitFileConfigUserDetailsService implements UserDetailsService {
       return new User("anonymous", "", ANONYMOUS_AUTHORITY);
     }
 
-    if (username.equals(this.PrivilegedUserProperties.getAdminName())) {
-      return new User(username, this.PrivilegedUserProperties.getAdminPassword(), ADMIN_AUTHORITY);
+    if (username.equals(this.privilegedUserProperties.getAdminName())) {
+      final Collection<? extends GrantedAuthority> adminAuthority = this.privilegedUserProperties.getAdminRoles() //
+          .stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(toList());
+      return new User(username, this.privilegedUserProperties.getAdminPassword(), adminAuthority);
     }
 
-    if (username.equals(this.PrivilegedUserProperties.getHookName())) {
-      return new User(username, this.PrivilegedUserProperties.getHookPassword(), HOOK_AUTHORITY);
+    if (username.equals(this.privilegedUserProperties.getHookName())) {
+      return new User(username, this.privilegedUserProperties.getHookPassword(), HOOK_AUTHORITY);
     }
 
     // username is `spring.application.name` or `spring.application.name@{profile.env}`

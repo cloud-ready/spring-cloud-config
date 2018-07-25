@@ -31,7 +31,7 @@ public abstract class AbstraceNotificationExtractor implements PropertyPathNotif
       return;
     }
     // example:
-    // http://gitlab.internal/configserver/oss-todomvc-app-config/commit/929f67f2b38a6269e7ad63f606c9d89a7d8eb79f
+    // http://gitlab/configserver/oss-todomvc-app-config/commit/929f67f2b38a6269e7ad63f606c9d89a7d8eb79f
     final String url = (String) commit.get("url");
     log.debug("config server monitor url:{}", url);
     if (StringUtils.isBlank(url)) {
