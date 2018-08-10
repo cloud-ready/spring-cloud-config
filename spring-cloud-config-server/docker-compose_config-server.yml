@@ -68,6 +68,7 @@ services:
     network_mode: bridge
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
+    - "${JAVA_DEBUG_PORT:-28888}:${JAVA_DEBUG_PORT:-28888}"
     volumes:
     - data:/home/alpine/data
     #- tmp:/tmp
