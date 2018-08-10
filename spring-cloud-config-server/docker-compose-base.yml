@@ -30,6 +30,8 @@ services:
     - GIT_PREFIX=${GIT_PREFIX:-https://github.com:443/spring-cloud-config-server}
     #- GIT_PREFIX=${GIT_PREFIX:-ssh://git@github.com:22/spring-cloud-config-server}
 
+    - JAVA_DEBUG_PORT=${JAVA_DEBUG_PORT}
+
     - SERVER_PORT=${SERVER_PORT:-8888}
 
     - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
