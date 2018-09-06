@@ -30,6 +30,8 @@ services:
     #- GIT_PREFIX=${GIT_PREFIX:-https://gitlab:443/spring-cloud-config-server}
     - GIT_PREFIX=${GIT_PREFIX:-ssh://git@gitlab:22/spring-cloud-config-server}
 
+    - LOGGING_LEVEL_ROOT=${LOGGING_LEVEL_ROOT:-INFO}
+
     - SERVER_PORT=${SERVER_PORT:-8888}
 
     - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME:-config-server}
