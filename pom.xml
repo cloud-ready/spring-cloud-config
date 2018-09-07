@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.home1</groupId>
         <artifactId>build-docker</artifactId>
-        <version>0.1.3</version>
+        <version>0.2.1</version>
     </parent>
 
     <artifactId>spring-cloud-config</artifactId>
@@ -32,10 +32,10 @@
     </scm>
 
     <properties>
-        <deps-spring-boot.version>0.1.1</deps-spring-boot.version>
+        <deps-spring-boot.version>0.1.6</deps-spring-boot.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
-        <log-config.version>0.1.1</log-config.version>
+        <log-config.version>0.1.2</log-config.version>
         <service-discovery.version>1.0.0</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
