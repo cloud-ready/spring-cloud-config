@@ -36,7 +36,7 @@
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
         <log-config.version>0.1.2</log-config.version>
-        <service-discovery.version>1.0.0</service-discovery.version>
+        <service-discovery.version>1.0.1</service-discovery.version>
         <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
 
         <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
