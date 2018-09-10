@@ -17,51 +17,51 @@ import java.io.FileReader;
 @Slf4j
 public class DeployKey {
 
-  private final String privateKeyLocation;
+    private final String privateKeyLocation;
 
-  public DeployKey(final String privateKeyLocation) {
-    this.privateKeyLocation = privateKeyLocation;
-  }
-
-  public void setUp(final SshUriProperties sshUriProperties) {
-    final String privateKey = this.getPrivateKey();
-
-    // setup ssh client
-    if (sshUriProperties == null) {
-      // setup SshSessionFactory as early as possible, requires @Order(HIGHEST_PRECEDENCE) on Configuration
-      //SshSessionFactory.setInstance(new CustomJschConfigSessionFactory(file));
-
-      System.setProperty("spring.cloud.config.server.git.private-key", privateKey);
-      System.setProperty("spring.cloud.config.server.git.ignore-local-ssh-settings", "true");
-    } else {
-      log.info("ssh uri properties privateKey is not blank: {}", isNotBlank(sshUriProperties.getPrivateKey()));
-      log.info("ssh uri properties is ignore local ssh settings: {}", sshUriProperties.isIgnoreLocalSshSettings());
-      log.info("ssh uri properties is strict host key checking: {}", sshUriProperties.isStrictHostKeyChecking());
-
-      sshUriProperties.setPrivateKey(privateKey);
-      sshUriProperties.setIgnoreLocalSshSettings(true);
+    public DeployKey(final String privateKeyLocation) {
+        this.privateKeyLocation = privateKeyLocation;
     }
-  }
 
-  @SneakyThrows
-  public String getPrivateKey() {
-    return copyToString(new FileReader(new File(this.getPrivateKeyPath())));
-  }
+    public static String getPrivateKeyPath(final String privateKeyLocation) {
+        return ResourceUtils.findResourceFile(privateKeyLocation, Consts.DATA_DIRECTORY);
+    }
 
-  public String getPrivateKeyPath() {
-    return getPrivateKeyPath(this.privateKeyLocation);
-  }
+    public void setUp(final SshUriProperties sshUriProperties) {
+        final String privateKey = this.getPrivateKey();
 
-  @SneakyThrows
-  public String getPublicKey() {
-    return copyToString(new FileReader(new File(this.getPublicKeyPath())));
-  }
+        // setup ssh client
+        if (sshUriProperties == null) {
+            // setup SshSessionFactory as early as possible, requires @Order(HIGHEST_PRECEDENCE) on Configuration
+            //SshSessionFactory.setInstance(new CustomJschConfigSessionFactory(file));
 
-  public String getPublicKeyPath() {
-    return this.getPrivateKeyPath() + ".pub";
-  }
+            System.setProperty("spring.cloud.config.server.git.private-key", privateKey);
+            System.setProperty("spring.cloud.config.server.git.ignore-local-ssh-settings", "true");
+        } else {
+            log.info("ssh uri properties privateKey is not blank: {}", isNotBlank(sshUriProperties.getPrivateKey()));
+            log.info("ssh uri properties is ignore local ssh settings: {}", sshUriProperties.isIgnoreLocalSshSettings());
+            log.info("ssh uri properties is strict host key checking: {}", sshUriProperties.isStrictHostKeyChecking());
 
-  public static String getPrivateKeyPath(final String privateKeyLocation) {
-    return ResourceUtils.findResourceFile(privateKeyLocation, Consts.DATA_DIRECTORY);
-  }
+            sshUriProperties.setPrivateKey(privateKey);
+            sshUriProperties.setIgnoreLocalSshSettings(true);
+        }
+    }
+
+    @SneakyThrows
+    public String getPrivateKey() {
+        return copyToString(new FileReader(new File(this.getPrivateKeyPath())));
+    }
+
+    public String getPrivateKeyPath() {
+        return getPrivateKeyPath(this.privateKeyLocation);
+    }
+
+    @SneakyThrows
+    public String getPublicKey() {
+        return copyToString(new FileReader(new File(this.getPublicKeyPath())));
+    }
+
+    public String getPublicKeyPath() {
+        return this.getPrivateKeyPath() + ".pub";
+    }
 }

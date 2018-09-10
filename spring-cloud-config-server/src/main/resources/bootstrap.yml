@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:config-server}

@@ -21,38 +21,38 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class PrivilegedUserProperties {
 
-  @Autowired
-  @Getter(value = PRIVATE)
-  private SecurityProperties securityProperties;
+    @Autowired
+    @Getter(value = PRIVATE)
+    private SecurityProperties securityProperties;
 
-  @Value("${security.hook.name:hook}")
-  private String hookName;
+    @Value("${security.hook.name:hook}")
+    private String hookName;
 
-  @Value("${security.hook.password:hook_pass}")
-  private String hookPassword;
+    @Value("${security.hook.password:hook_pass}")
+    private String hookPassword;
 
-  public String getAdminName() {
-    return this.securityProperties.getUser().getName();
-  }
-
-  public String getAdminPassword() {
-    return this.securityProperties.getUser().getPassword();
-  }
-
-  public List<String> getAdminRoles() {
-    return this.securityProperties.getUser().getRole();
-  }
-
-  @PostConstruct
-  private void init() {
-    if (isBlank(this.getAdminPassword())) {
-      this.securityProperties.getUser().setPassword(UUID.randomUUID().toString());
-      log.info("auto generated admin password, username:{}, password:{}", this.getAdminName(), this.getAdminPassword());
+    public String getAdminName() {
+        return this.securityProperties.getUser().getName();
     }
 
-    if (isBlank(this.hookPassword)) {
-      this.hookPassword = UUID.randomUUID().toString();
-      log.info("auto generated hook password, username:{}, password:{}", this.hookName, this.hookPassword);
+    public String getAdminPassword() {
+        return this.securityProperties.getUser().getPassword();
     }
-  }
+
+    public List<String> getAdminRoles() {
+        return this.securityProperties.getUser().getRole();
+    }
+
+    @PostConstruct
+    private void init() {
+        if (isBlank(this.getAdminPassword())) {
+            this.securityProperties.getUser().setPassword(UUID.randomUUID().toString());
+            log.info("auto generated admin password, username:{}, password:{}", this.getAdminName(), this.getAdminPassword());
+        }
+
+        if (isBlank(this.hookPassword)) {
+            this.hookPassword = UUID.randomUUID().toString();
+            log.info("auto generated hook password, username:{}, password:{}", this.hookName, this.hookPassword);
+        }
+    }
 }

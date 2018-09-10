@@ -16,26 +16,26 @@ import org.eclipse.jgit.util.FS;
 @Deprecated
 public class CustomJschConfigSessionFactory extends JschConfigSessionFactory {
 
-  private String[] identityKeyPaths;
+    private String[] identityKeyPaths;
 
-  public CustomJschConfigSessionFactory(final String... identityKeyPaths) {
-    this.identityKeyPaths = identityKeyPaths;
-  }
-
-  @Override
-  protected void configure(final OpenSshConfig.Host hc, final Session session) {
-    // nothing special needed here.
-    session.setConfig("StrictHostKeyChecking", "no");
-  }
-
-  @Override
-  protected JSch getJSch(final OpenSshConfig.Host hc, final FS fs) throws JSchException {
-    final JSch jsch = super.getJSch(hc, fs);
-    // Clean out anything 'default' - any encrypted keys that are loaded by default before this will break.
-    jsch.removeAllIdentity();
-    for (final String identKeyPath : this.identityKeyPaths) {
-      jsch.addIdentity(identKeyPath);
+    public CustomJschConfigSessionFactory(final String... identityKeyPaths) {
+        this.identityKeyPaths = identityKeyPaths;
     }
-    return jsch;
-  }
+
+    @Override
+    protected void configure(final OpenSshConfig.Host hc, final Session session) {
+        // nothing special needed here.
+        session.setConfig("StrictHostKeyChecking", "no");
+    }
+
+    @Override
+    protected JSch getJSch(final OpenSshConfig.Host hc, final FS fs) throws JSchException {
+        final JSch jsch = super.getJSch(hc, fs);
+        // Clean out anything 'default' - any encrypted keys that are loaded by default before this will break.
+        jsch.removeAllIdentity();
+        for (final String identKeyPath : this.identityKeyPaths) {
+            jsch.addIdentity(identKeyPath);
+        }
+        return jsch;
+    }
 }

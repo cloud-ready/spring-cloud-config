@@ -47,106 +47,105 @@ import java.io.File;
 @Slf4j
 public class ConfigServer {
 
-  private static final DeployKey DEPLOY_KEY;
+    private static final DeployKey DEPLOY_KEY;
 
-  static {
-    // set default profiles
-    final String profilesFromEnv = System.getenv("SPRING_PROFILES_ACTIVE");
-    final String profilesFromProperty = System.getProperty("spring.profiles.active", "");
-    if (isBlank(profilesFromEnv) && isBlank(profilesFromProperty)) {
-      System.setProperty("spring.profiles.active", "port_nonsecure");
+    static {
+        // set default profiles
+        final String profilesFromEnv = System.getenv("SPRING_PROFILES_ACTIVE");
+        final String profilesFromProperty = System.getProperty("spring.profiles.active", "");
+        if (isBlank(profilesFromEnv) && isBlank(profilesFromProperty)) {
+            System.setProperty("spring.profiles.active", "port_nonsecure");
+        }
+
+        // set deploy key
+        final String deployKeyFromEnv = System.getenv("SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY");
+        final String deployKeyFromProperty = System.getProperty("spring.cloud.config.server.git.deploy-key", "");
+        final String deployKeyLocation;
+        if (isNotBlank(deployKeyFromEnv)) {
+            deployKeyLocation = deployKeyFromEnv;
+        } else if (isNotBlank(deployKeyFromProperty)) {
+            deployKeyLocation = deployKeyFromProperty;
+        } else {
+            deployKeyLocation = System.getProperty("user.home") + "/.ssh/id_rsa";
+        }
+
+        final File deployKeyFile = new File(DeployKey.getPrivateKeyPath(deployKeyLocation));
+        if (deployKeyFile.exists() && deployKeyFile.canRead()) {
+            DEPLOY_KEY = new DeployKey(deployKeyLocation);
+            DEPLOY_KEY.setUp(null);
+        } else {
+            DEPLOY_KEY = null;
+        }
     }
 
-    // set deploy key
-    final String deployKeyFromEnv = System.getenv("SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY");
-    final String deployKeyFromProperty = System.getProperty("spring.cloud.config.server.git.deploy-key", "");
-    final String deployKeyLocation;
-    if (isNotBlank(deployKeyFromEnv)) {
-      deployKeyLocation = deployKeyFromEnv;
-    } else if (isNotBlank(deployKeyFromProperty)) {
-      deployKeyLocation = deployKeyFromProperty;
-    } else {
-      deployKeyLocation = System.getProperty("user.home") + "/.ssh/id_rsa";
+    @Autowired
+    private Environment environment;
+    @Autowired
+    private ConfigSecurity configSecurity;
+
+    public static void main(final String... args) {
+        SpringApplication.run(ConfigServer.class, args);
     }
 
-    final File deployKeyFile = new File(DeployKey.getPrivateKeyPath(deployKeyLocation));
-    if (deployKeyFile.exists() && deployKeyFile.canRead()) {
-      DEPLOY_KEY = new DeployKey(deployKeyLocation);
-      DEPLOY_KEY.setUp(null);
-    } else {
-      DEPLOY_KEY = null;
+    @ResponseBody
+    @RequestMapping(path = {"/", "${spring.cloud.config.server.prefix:}/"}, method = GET)
+    public String index() {
+        return "Visit https://github.com/cloud-ready/spring-cloud-config-server for more info.";
     }
-  }
 
-  @Configuration
-  @EnableAutoConfiguration
-  @EnableConfigServer
-  //@EnableEurekaClient
-  @EnableDiscoveryClient
-  protected class ConfigServerConfiguration {
-
-    /**
-     * see: {@link org.springframework.cloud.config.server.config.TransportConfiguration}
-     */
-    @ConditionalOnMissingBean(TransportConfigCallback.class)
-    @Bean
-    public TransportConfigCallback propertiesBasedSshTransportCallback(final SshUriProperties sshUriProperties) {
-      if (ConfigServer.DEPLOY_KEY != null) {
-        DEPLOY_KEY.setUp(sshUriProperties);
-        return new PropertiesBasedSshTransportConfigCallback(sshUriProperties);
-      } else {
-        return new FileBasedSshTransportConfigCallback(sshUriProperties);
-      }
+    @ResponseBody
+    @RequestMapping(path = "${spring.cloud.config.server.prefix:}/deployKeyPublic", method = GET)
+    public ResponseEntity<String> getDeployKeyPublic() {
+        final ResponseEntity<String> responseEntity;
+        if (ConfigServer.DEPLOY_KEY != null) {
+            responseEntity = new ResponseEntity<>(ConfigServer.DEPLOY_KEY.getPublicKey(), HttpStatus.OK);
+        } else {
+            responseEntity = new ResponseEntity<>("", HttpStatus.NOT_FOUND);
+        }
+        return responseEntity;
     }
-  }
 
-  @Configuration
-  public static class HealthIndicatorConfiguration {
-
-    @Bean
-    @ConditionalOnProperty(value = "spring.cloud.config.server.health.enabled", matchIfMissing = true)
-    public ConfigServerHealthIndicator configServerHealthIndicator(final EnvironmentRepository repository) {
-      return new ConfigServerHealthIndicator(repository);
+    @SneakyThrows
+    @ResponseBody
+    @RequestMapping(path = "${spring.cloud.config.server.prefix:}/encryptParentPassword", method = POST,
+        consumes = APPLICATION_FORM_URLENCODED_VALUE)
+    public String encryptParentPassword(
+        @RequestParam("application") final String application,
+        @RequestParam("parentApplication") final String parentApplication,
+        @RequestParam("parentPassword") final String parentPassword
+    ) {
+        return this.configSecurity.encryptParentPassword(application, parentApplication, parentPassword);
     }
-  }
 
-  @Autowired
-  private Environment environment;
+    @Configuration
+    public static class HealthIndicatorConfiguration {
 
-  @Autowired
-  private ConfigSecurity configSecurity;
-
-  @ResponseBody
-  @RequestMapping(path = {"/", "${spring.cloud.config.server.prefix:}/"}, method = GET)
-  public String index() {
-    return "Visit https://github.com/cloud-ready/spring-cloud-config-server for more info.";
-  }
-
-  @ResponseBody
-  @RequestMapping(path = "${spring.cloud.config.server.prefix:}/deployKeyPublic", method = GET)
-  public ResponseEntity<String> getDeployKeyPublic() {
-    final ResponseEntity<String> responseEntity;
-    if (ConfigServer.DEPLOY_KEY != null) {
-      responseEntity = new ResponseEntity<>(ConfigServer.DEPLOY_KEY.getPublicKey(), HttpStatus.OK);
-    } else {
-      responseEntity = new ResponseEntity<>("", HttpStatus.NOT_FOUND);
+        @Bean
+        @ConditionalOnProperty(value = "spring.cloud.config.server.health.enabled", matchIfMissing = true)
+        public ConfigServerHealthIndicator configServerHealthIndicator(final EnvironmentRepository repository) {
+            return new ConfigServerHealthIndicator(repository);
+        }
     }
-    return responseEntity;
-  }
 
-  @SneakyThrows
-  @ResponseBody
-  @RequestMapping(path = "${spring.cloud.config.server.prefix:}/encryptParentPassword", method = POST,
-      consumes = APPLICATION_FORM_URLENCODED_VALUE)
-  public String encryptParentPassword(
-      @RequestParam("application") final String application,
-      @RequestParam("parentApplication") final String parentApplication,
-      @RequestParam("parentPassword") final String parentPassword
-  ) {
-    return this.configSecurity.encryptParentPassword(application, parentApplication, parentPassword);
-  }
+    @Configuration
+    @EnableAutoConfiguration
+    @EnableConfigServer
+    //@EnableEurekaClient
+    @EnableDiscoveryClient
+    protected class ConfigServerConfiguration {
 
-  public static void main(final String... args) {
-    SpringApplication.run(ConfigServer.class, args);
-  }
+        /**
+         * see: {@link org.springframework.cloud.config.server.config.TransportConfiguration}
+         */
+        @ConditionalOnMissingBean(TransportConfigCallback.class)
+        @Bean
+        public TransportConfigCallback propertiesBasedSshTransportCallback(final SshUriProperties sshUriProperties) {
+            if (ConfigServer.DEPLOY_KEY != null) {
+                DEPLOY_KEY.setUp(sshUriProperties);
+                return new PropertiesBasedSshTransportConfigCallback(sshUriProperties);
+            } else {
+                return new FileBasedSshTransportConfigCallback(sshUriProperties);
+            }
+        }
+    }
 }
