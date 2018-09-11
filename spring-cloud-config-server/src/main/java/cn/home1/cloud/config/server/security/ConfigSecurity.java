@@ -53,7 +53,7 @@ public class ConfigSecurity {
     private JWTVerifier hmacVerifier;
 
     @Setter
-    @Value("${security.basic.enabled:true}")
+    @Value("${spring.security.enabled:true}")
     private Boolean securityEnabled;
 
     public ConfigSecurity() {

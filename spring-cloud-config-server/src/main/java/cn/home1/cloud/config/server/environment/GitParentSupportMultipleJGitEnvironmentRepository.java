@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.config.environment.Environment;
+import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
 import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentRepository;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,8 +26,8 @@ public class GitParentSupportMultipleJGitEnvironmentRepository extends MultipleJ
     @Setter
     private ConfigSecurity configSecurity;
 
-    public GitParentSupportMultipleJGitEnvironmentRepository(final ConfigurableEnvironment environment) {
-        super(environment);
+    public GitParentSupportMultipleJGitEnvironmentRepository(ConfigurableEnvironment environment, final MultipleJGitEnvironmentProperties properties) {
+        super(environment, properties);
     }
 
     @Override

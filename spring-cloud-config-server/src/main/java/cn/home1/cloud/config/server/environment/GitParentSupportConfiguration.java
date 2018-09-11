@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
+import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -45,9 +46,9 @@ public class GitParentSupportConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(EnvironmentRepository.class)
-    public EnvironmentRepository environmentRepository() {
+    public EnvironmentRepository environmentRepository(final MultipleJGitEnvironmentProperties environmentProperties) {
         final GitParentSupportMultipleJGitEnvironmentRepository repository =
-            new GitParentSupportMultipleJGitEnvironmentRepository(this.environment);
+            new GitParentSupportMultipleJGitEnvironmentRepository(this.environment, environmentProperties);
 
         repository.setConfigSecurity(this.configSecurity());
 

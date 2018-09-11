@@ -19,13 +19,14 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.config.server.EnableConfigServer;
 import org.springframework.cloud.config.server.config.ConfigServerHealthIndicator;
-import org.springframework.cloud.config.server.config.TransportConfiguration.FileBasedSshTransportConfigCallback;
-import org.springframework.cloud.config.server.config.TransportConfiguration.PropertiesBasedSshTransportConfigCallback;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
-import org.springframework.cloud.config.server.ssh.SshUriProperties;
+import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
+import org.springframework.cloud.config.server.ssh.FileBasedSshTransportConfigCallback;
+import org.springframework.cloud.config.server.ssh.PropertiesBasedSshTransportConfigCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -43,7 +44,7 @@ import java.io.File;
  * see: {@link org.springframework.cloud.config.server.config.ConfigServerMvcConfiguration}
  */
 @RestController
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @Slf4j
 public class ConfigServer {
 
@@ -135,11 +136,11 @@ public class ConfigServer {
     protected class ConfigServerConfiguration {
 
         /**
-         * see: {@link org.springframework.cloud.config.server.config.TransportConfiguration}
+         * see: {@link org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentRepositoryFactory}
          */
         @ConditionalOnMissingBean(TransportConfigCallback.class)
         @Bean
-        public TransportConfigCallback propertiesBasedSshTransportCallback(final SshUriProperties sshUriProperties) {
+        public TransportConfigCallback propertiesBasedSshTransportCallback(final MultipleJGitEnvironmentProperties sshUriProperties) {
             if (ConfigServer.DEPLOY_KEY != null) {
                 DEPLOY_KEY.setUp(sshUriProperties);
                 return new PropertiesBasedSshTransportConfigCallback(sshUriProperties);

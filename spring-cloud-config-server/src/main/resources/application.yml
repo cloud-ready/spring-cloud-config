@@ -16,28 +16,29 @@ logging:
     root: ${LOGGING_LEVEL_ROOT:DEBUG}
 
 management:
-  context-path: ${MANAGEMENT_CONTEXTPATH:/actuator}
-  #port:
-  security:
-    enabled: true
-    roles: ACTUATOR # no ROLE_ prefix here
+  endpoint:
+    shutdown.enabled: ${MANAGEMENT_ENDPOINT_SHUTDOWN_ENABLED:true}
+    health:
+      show-details: ${MANAGEMENT_ENDPOINT_HEALTH_SHOWDETAILS:WHEN_AUTHORIZED}
+      roles: ${MANAGEMENT_ENDPOINT_HEALTH_ROLES:ACTUATOR}
+  endpoints:
+    web: # since spring-boot 2.x
+      base-path: ${MANAGEMENT_ENDPOINTS_WEB_BASEPATH:/actuator} # management.context-path deprecated since spring-boot 2.x
+      exposure:
+        include: "${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:*}"
+        exclude: "${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_EXCLUDE:}"
+  #port: # deprecated since spring-boot 2.x
+  #security: # deprecated since spring-boot 2.x
+  #  enabled: true
+  #  roles: ADMIN # no ROLE_ prefix here
 
 # consul needs endpoint.health to check service status,
 # set sensitive to false will hide detailed infos but need not to authenticate.
-endpoints.health.sensitive: ${ENDPOINTS_HEALTH_SENSITIVE:false}
-
-security:
-  basic.enabled: ${SPRING_SECURITY_ENABLED:true}
-  user:
-    name: ${SECURITY_USER_NAME:admin}
-    password: ${SPRING_SECURITY_USER_PASSWORD:admin_pass}
-    role: ${SPRING_SECURITY_USER_ROLES:ACTUATOR, ADMIN, SUPERUSER, USER}
-  hook:
-    name: ${SPRING_SECURITY_HOOK_NAME:hook}
-    password: ${SPRING_SECURITY_HOOK_PASSWORD:hook_pass}
+#endpoints.health.sensitive: ${ENDPOINTS_HEALTH_SENSITIVE:false} # deprecated since spring-boot 2.x
 
 server:
-  context-path: ${SERVER_CONTEXTPATH:} # deprecated since spring-boot 2.x
+  servlet.context-path: ${SERVER_SERVLET_CONTEXTPATH:} # since spring-boot 2.x
+  #context-path: ${SERVER_CONTEXTPATH:} # deprecated since spring-boot 2.x
   port: ${SERVER_PORT:8888}
 
 eureka:
@@ -47,21 +48,21 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka-standalone:8761/eureka/}
     register-with-eureka: ${EUREKA_CLIENT_REGISTERWITHEUREKA:true}
   instance:
-    health-check-url-path: ${endpoints.health.path:/health}
+    health-check-url-path: ${MANAGEMENT_ENDPOINTS_WEB_BASEPATH:/actuator}/health
     # eureka.instance.hostname affect Status->instances's url href (not text) value on dashboard
-    hostname: ${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}
     lease-renewal-interval-in-seconds: 10
     metadataMap:
       configPath: ${spring.cloud.config.server.prefix}
     prefer-ip-address: ${EUREKA_INSTANCE_PREFERIPADDRESS:false}
-    status-page-url-path: ${endpoints.info.path:/info}
+    status-page-url-path: ${MANAGEMENT_ENDPOINTS_WEB_BASEPATH:/actuator}/info
     # Registering a Secure Application
     #health-check-url: https://${eureka.instance.hostname}/
     #status-page-url: https://${eureka.instance.hostname}/
 
 spring.autoconfigure.exclude:
-- org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration
-- org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration
+- org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration # spring-boot 1.x and 2.x
+- org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration # spring-boot 1.x and 2.x
 
 spring:
   cloud:
@@ -110,22 +111,32 @@ spring:
     consul:
       discovery:
         enabled: ${SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED:true}
-        health-check-path: ${SERVER_CONTEXTPATH:${server.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.context-path:}}/health
-        hostname: ${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}}
-        ip-address: ${SPRING_CLOUD_CONSUL_DISCOVERY_IPADDRESS:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}
+        health-check-path: ${SERVER_CONTEXTPATH:${server.servlet.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.endpoints.web.base-path:}}/health
+        hostname: ${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}}
+        ip-address: ${SPRING_CLOUD_CONSUL_DISCOVERY_IPADDRESS:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}
         prefer-ip-address: ${SPRING_CLOUD_CONSUL_DISCOVERY_PREFERIPADDRESS:${EUREKA_INSTANCE_PREFERIPADDRESS:true}}
       enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
 
     inetutils:
-      preferred-networks: ${SPRING_CLOUD_INETUTILS_PREFERREDNETWORKS:^192\.168\..+, ^172\.30\..+, ^10\..+}
+      preferred-networks: ${SPRING_CLOUD_INETUTILS_IGNOREDINTERFACES:^192\.168\..+, ^172\.30\..+, ^10\..+}
       ignored-interfaces: ${SPRING_CLOUD_INETUTILS_IGNOREDINTERFACES:^[a-z]?tun[0-9]*, ^awdl[0-9]*, ^lo[0-9]*}
 
-#spring:
-#  rabbitmq:
-#    host: ${SPRING_RABBITMQ_HOST:cloudbus}
-#    port: ${SPRING_RABBITMQ_PORT:5672}
-#    username: ${SPRING_RABBITMQ_USERNAME:user}
-#    password: ${SPRING_RABBITMQ_PASSWORD:user_pass}
+  #  rabbitmq:
+  #    host: ${SPRING_RABBITMQ_HOST:cloudbus}
+  #    port: ${SPRING_RABBITMQ_PORT:5672}
+  #    username: ${SPRING_RABBITMQ_USERNAME:user}
+  #    password: ${SPRING_RABBITMQ_PASSWORD:user_pass}
+
+  security:
+    enabled: ${SPRING_SECURITY_ENABLED:true} # see: https://github.com/spring-projects/spring-boot/issues/12323
+    user:
+      name: ${SPRING_SECURITY_USER_NAME:admin}
+      password: ${SPRING_SECURITY_USER_PASSWORD:admin_pass}
+      roles: ${SPRING_SECURITY_USER_ROLES:ACTUATOR, ADMIN, SUPERUSER, USER}
+    hook:
+      name: ${SPRING_SECURITY_HOOK_NAME:hook}
+      password: ${SPRING_SECURITY_HOOK_PASSWORD:hook_pass}
+
 
 ---
 spring:
@@ -133,19 +144,19 @@ spring:
 
 eureka.instance:
   # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
-  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}
+  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}
   non-secure-port: ${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}
   non-secure-port-enabled: true
   secure-port-enabled: false
 
 #logging:
-#  file: ${LOGGING_FILE:${LOG_FILE:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}-${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}}.log}
+#  file: ${LOGGING_FILE:${LOG_FILE:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}-${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}}.log}
 
 spring.cloud.consul:
   discovery:
-    health-check-url: http://${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port:80}}}${SERVER_CONTEXTPATH:${server.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.context-path:}}/health
+    health-check-url: http://${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port:80}}}${SERVER_CONTEXTPATH:${server.servlet.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.endpoints.web.base-path:}}/health
     # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
-    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}
+    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}}:${EUREKA_INSTANCE_NONSECUREPORT:${SERVER_PORT:${server.port}}}
 
 ---
 spring:
@@ -153,32 +164,32 @@ spring:
 
 eureka.instance:
   # eureka.instance.instance-id affect Status->instances's url text (not href) value on dashboard
-  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}
+  instance-id: ${spring.application.name}:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}
   non-secure-port-enabled: false
   secure-port: ${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}
   secure-port-enabled: true
 
 #logging:
-#  file: ${LOGGING_FILE:${LOG_FILE:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}-${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}}.log}
+#  file: ${LOGGING_FILE:${LOG_FILE:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}-${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}}.log}
 
 spring.cloud.consul:
   discovery:
-    health-check-url: https://${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}${SERVER_CONTEXTPATH:${server.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.context-path:}}/health
+    health-check-url: https://${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}${SERVER_CONTEXTPATH:${server.servlet.context-path:}}${MANAGEMENT_CONTEXTPATH:${management.endpoints.web.base-path:}}/health
     # consul's instance-id must start with letters, hostname could be an ip address, so place spring.application.name at first position.
-    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}
+    instance-id: ${spring.application.name}:${SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME:${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}}:${EUREKA_INSTANCE_SECUREPORT:${SERVER_PORT:${server.port}}}
 
 ---
 spring:
   profiles: manual_ip_hostname
 
 eureka.instance:
-  hostname: ${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}}}
-  ip-address: ${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ipAddress}}}
+  hostname: ${EUREKA_INSTANCE_HOSTNAME:${SPRING_CLOUD_CLIENT_HOSTNAME:${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}}}
+  ip-address: ${EUREKA_INSTANCE_IPADDRESS:${HOST_IPADDRESS:${spring.cloud.client.ip-address}}}
 
 spring.cloud:
   client:
     hostname: ${SPRING_CLOUD_CLIENT_HOSTNAME:}
-    ipAddress: ${SPRING_CLOUD_CLIENT_IPADDRESS:}
+    ip-address: ${SPRING_CLOUD_CLIENT_IPADDRESS:}
 
 ---
 spring:

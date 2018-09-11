@@ -9,7 +9,7 @@ import cn.home1.cloud.config.server.util.ResourceUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.cloud.config.server.ssh.SshUriProperties;
+import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
 
 import java.io.File;
 import java.io.FileReader;
@@ -27,7 +27,7 @@ public class DeployKey {
         return ResourceUtils.findResourceFile(privateKeyLocation, Consts.DATA_DIRECTORY);
     }
 
-    public void setUp(final SshUriProperties sshUriProperties) {
+    public void setUp(final MultipleJGitEnvironmentProperties sshUriProperties) {
         final String privateKey = this.getPrivateKey();
 
         // setup ssh client

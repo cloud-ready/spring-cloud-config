@@ -25,10 +25,10 @@ public class PrivilegedUserProperties {
     @Getter(value = PRIVATE)
     private SecurityProperties securityProperties;
 
-    @Value("${security.hook.name:hook}")
+    @Value("${spring.security.hook.name:hook}")
     private String hookName;
 
-    @Value("${security.hook.password:hook_pass}")
+    @Value("${spring.security.hook.password:hook_pass}")
     private String hookPassword;
 
     public String getAdminName() {
@@ -40,7 +40,7 @@ public class PrivilegedUserProperties {
     }
 
     public List<String> getAdminRoles() {
-        return this.securityProperties.getUser().getRole();
+        return this.securityProperties.getUser().getRoles();
     }
 
     @PostConstruct

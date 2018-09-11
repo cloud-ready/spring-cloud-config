@@ -81,7 +81,7 @@ Call application's `/refresh` endpoint after push new config files onto git serv
 Only beans that annotated with `@RefreshScope` annotation will be refreshed.
 ```bash
 # contents in '[]' is ignorable, depends on application instance's config
-curl -s -X GET [-u user:password] http[s]://host[:port][/server.context-path][/management.context-path]/refresh
+curl -s -X GET [-u user:password] http[s]://host[:port][/server.servlet.context-path][/management.endpoints.web.base-path]/refresh
 ```
 
 5.2. git push hook on git service -> config-server's `monitor` endpoint -> cloud-bus (MQ) -> application instances automatically
