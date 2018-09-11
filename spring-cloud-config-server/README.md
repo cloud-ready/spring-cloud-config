@@ -28,22 +28,22 @@ config-server supports following url patterns ({profiles} is a comma splitted li
 
 - /{application}/{profiles}[/{label}]
 ```bash
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app/production.env,ut.env/develop
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app/production.env,ut.env
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app/production.env,ut.env/develop
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app/production.env,ut.env
 ```
 
 /{application}-{profiles}.json
 /{label}/{application}-{profiles}.json
 ```bash
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app-production.env,ut.env.json
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develop/demo-app-production.env,ut.env.json
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app-production.env,ut.env.json
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/develop/demo-app-production.env,ut.env.json
 ```
 
 /{application}-{profiles}.properties
 /{label}/{application}-{profiles}.properties
 ```bash
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app-production.env,ut.env.properties
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develop/demo-app-production.env,ut.env.properties
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app-production.env,ut.env.properties
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/develop/demo-app-production.env,ut.env.properties
 ```
 
 /{application}-{profiles}.yml
@@ -51,11 +51,11 @@ curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develo
 /{label}/{application}-{profiles}.yml
 /{label}/{application}-{profiles}.yaml
 ```bash
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app-production.env,ut.env.yml
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/demo-app-production.env,ut.env.yaml
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app-production.env,ut.env.yml
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/demo-app-production.env,ut.env.yaml
 
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develop/demo-app-production.env,ut.env.yml
-curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develop/demo-app-production.env,ut.env.yaml
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/develop/demo-app-production.env,ut.env.yml
+curl -s -X GET -u admin:admin_pass http://config-server:8888/config/develop/demo-app-production.env,ut.env.yaml
 ```
 
 
@@ -64,13 +64,13 @@ curl -s -X GET -u admin:admin_pass http://config-server.local:8888/config/develo
 4.1. Encrypt
 Any one can access `/encrypt` endpoint
 ```bash
-curl -s -X POST http://config-server.local:8888/config/encrypt -H 'Accept: application/json' -d mysecret
+curl -s -X POST http://config-server:8888/config/encrypt -H 'Accept: application/json' -d mysecret
 ```
 
 4.2. Decrypt
 Only admin can access `/decrypt` decrypt
 ```bash
-curl -s -X POST -u admin:admin_pass http://config-server.local:8888/config/decrypt -H 'Accept: application/json' -d $(curl -s -X POST http://config-server.local:8888/config/encrypt -H 'Accept: application/json' -d mysecret)
+curl -s -X POST -u admin:admin_pass http://config-server:8888/config/decrypt -H 'Accept: application/json' -d $(curl -s -X POST http://config-server:8888/config/encrypt -H 'Accept: application/json' -d mysecret)
 ```
 
 5. Runtime refresh (update) application's config
@@ -104,12 +104,12 @@ TODO doc
 
 
 6. Other endpoints
-- http://config-server.local:8888/
+- http://config-server:8888/
 
-- http://config-server.local:8888/config/deployKeyPublic
+- http://config-server:8888/config/deployKeyPublic
 
-- http://config-server.local:8888/manage/info
-- http://config-server.local:8888/manage/health
+- http://config-server:8888/manage/info
+- http://config-server:8888/manage/health
 
 
 ## Extended features
@@ -124,10 +124,10 @@ Note:
 > Anyone who copied it will get privilege to access parent config repository.
 + You can use different `spring.cloud.config.parent.password` in auth-label-develop, auth-profile-staging.env, auth-profile-production.env configs to protect sensible properties.
 > If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
-> i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
+> i.e. curl -X GET -u application@staging.env http://config-server:8888/config/application/staging.env
 + Use `/encryptParentPassword` to generate a encrypted and signed parent password (token), only admin can do this.
 ```bash
-curl -s -X POST http://config-server.local:8888/config/encryptParentPassword \
+curl -s -X POST http://config-server:8888/config/encryptParentPassword \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -H "Accept: application/json" \
 -u admin:admin_pass \
@@ -145,8 +145,8 @@ spring.cloud.config.parent:
 
 Test parent password
 ```bash
-curl -s -X GET -u demo-app:demo-app_pass http://config-server.local:8888/config/demo-app/production.env,ut.env/develop
-curl -s -X GET -u demo-app:demo-app_pass http://config-server.local:8888/config/demo-app/production.env,ut.env/master
+curl -s -X GET -u demo-app:demo-app_pass http://config-server:8888/config/demo-app/production.env,ut.env/develop
+curl -s -X GET -u demo-app:demo-app_pass http://config-server:8888/config/demo-app/production.env,ut.env/master
 ```
 
 - Custom Feature 2. Password pre git config repository
@@ -156,7 +156,7 @@ Note:
 + config-server support load `spring.cloud.config.password` form environment profiles or default profile.
 + You can use different `spring.cloud.config.password` in auth-label-develop, auth-profile-staging.env, auth-profile-production.env configs to protect sensible properties.
 > If you put password in different environment profiles, you need to provide the application (user) name and environment profile name (where the password stored), join them with a '@' as username.
-> i.e. curl -X GET -u application@staging.env http://config-server.local:8888/config/application/staging.env
+> i.e. curl -X GET -u application@staging.env http://config-server:8888/config/application/staging.env
 + config-server will use parent's `spring.cloud.config.password` if child's `spring.cloud.config.password` absent and it has a parent.
 + It is recommended to use a encrypted `spring.cloud.config.password` in config file.
 
@@ -184,10 +184,10 @@ spring.cloud:
 config-server's application.yml example:
 ```yaml
 security:
-  basic.enabled: ${SECURITY_BASIC_ENABLED:true}
+  basic.enabled: ${SPRING_SECURITY_ENABLED:true}
   hook:
-    name: ${SECURITY_HOOK_NAME:hook}
-    password: ${SECURITY_HOOK_PASSWORD:hook_pass}
+    name: ${SPRING_SECURITY_HOOK_NAME:hook}
+    password: ${SPRING_SECURITY_HOOK_PASSWORD:hook_pass}
 ```
 
 

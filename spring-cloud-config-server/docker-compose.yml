@@ -1,4 +1,3 @@
-
 version: '2.1'
 services:
   config-server-develop:
@@ -13,6 +12,8 @@ services:
     - EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-true}
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
 
+    - LOGGING_LEVEL_ROOT=${LOGGING_LEVEL_ROOT:-INFO}
+
     - SERVER_PORT=${SERVER_PORT:-8888}
 
     hostname: ${CONTAINER_HOST_NAME:-config-server}
@@ -23,8 +24,8 @@ services:
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     volumes:
-    - data:/tmp
-    - data:/root/data
+    - data:/home/alpine/data
+    #- tmp:/tmp
 
 networks:
   local-network:
@@ -42,5 +43,11 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${PWD}/data
+      device: ${PWD}/data/data
+      o: bind
+  tmp:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/tmp
       o: bind

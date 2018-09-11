@@ -33,165 +33,162 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class ConfigSecurity {
 
-  private static final int BCRYPT_STRENGTH = -1;
+    static final String TOKEN_PREFIX = "{token}";
+    private static final int BCRYPT_STRENGTH = -1;
+    private static final Pattern CONCAT_PATTERN = Pattern.compile(":");
+    private static final String TOKEN_CLAIM = "encrypted";
+    private static final int TOKEN_EXPIRE_DAYS = 365 * 5;
+    private static final String TOKEN_ISSUER = "config-server";
+    private final PasswordEncoder passwordEncoder;
 
-  private static final Pattern CONCAT_PATTERN = Pattern.compile(":");
+    @Setter
+    private TextEncryptor encryptor;
 
-  private static final String TOKEN_CLAIM = "encrypted";
-  private static final int TOKEN_EXPIRE_DAYS = 365 * 5;
-  private static final String TOKEN_ISSUER = "config-server";
-  static final String TOKEN_PREFIX = "{token}";
+    private Algorithm hmacAlgorithm;
 
-  private final PasswordEncoder passwordEncoder;
+    @Setter
+    @Value("${spring.cloud.config.encrypt.hmac-secret:secret}")
+    private String hmacSecret;
 
-  @Setter
-  private TextEncryptor encryptor;
+    private JWTVerifier hmacVerifier;
 
-  private Algorithm hmacAlgorithm;
+    @Setter
+    @Value("${security.basic.enabled:true}")
+    private Boolean securityEnabled;
 
-  @Setter
-  @Value("${spring.cloud.config.encrypt.hmac-secret:secret}")
-  private String hmacSecret;
-
-  private JWTVerifier hmacVerifier;
-
-  @Setter
-  @Value("${security.basic.enabled:true}")
-  private Boolean securityEnabled;
-
-  public ConfigSecurity() {
-    this.passwordEncoder = new BCryptPasswordEncoder(BCRYPT_STRENGTH);
-  }
-
-  /**
-   * By default, this is a {@link org.springframework.cloud.config.server.encryption.KeyStoreTextEncryptorLocator} instance.
-   */
-  @Autowired
-  public void setEncryptorLocator(final TextEncryptorLocator encryptorLocator) {
-    this.encryptor = encryptorLocator.locate(ImmutableMap.of());
-  }
-
-  @PostConstruct
-  @SneakyThrows
-  public void init() {
-    this.hmacAlgorithm = Algorithm.HMAC256(this.hmacSecret);
-    this.hmacVerifier = JWT.require(this.hmacAlgorithm)
-        .withIssuer(TOKEN_ISSUER)
-        .build(); //Reusable verifier instance
-  }
-
-  /**
-   * Generate a password (token) valid only for given application to access a given parent
-   *
-   * @param application       from child config
-   * @param parentApplication from child config
-   * @param parentPassword    from child config
-   * @return token valid for application only
-   */
-  public String encryptParentPassword(final String application, final String parentApplication, final String parentPassword) {
-    //if (!this.securityEnabled) {
-    //  return "";
-    //}
-
-    checkArgument(isNotBlank(application), "blank application");
-    checkArgument(isNotBlank(application), "blank parentApplication");
-    checkArgument(isNotBlank(application), "blank parentPassword");
-
-    // digest/hash
-    // random string (length 16)
-    final String randomString = random(16, 0, 0, true, true, null, new SecureRandom());
-    final String encodedApplication = this.passwordEncoder.encode(application);
-    final String encodedParentApplication = this.passwordEncoder.encode(parentApplication);
-    final String encodedParentPassword = this.passwordEncoder.encode(parentPassword);
-
-    // concat
-    final String plainText = randomString + ":" + encodedApplication + ":" + encodedParentApplication + ":" + encodedParentPassword;
-
-    // encrypt
-    final String encrypted = this.encryptor.encrypt(plainText);
-
-    // sign
-    final String token = JWT.create()
-        .withIssuer(TOKEN_ISSUER)
-        .withClaim(TOKEN_CLAIM, encrypted)
-        .withExpiresAt(now().plusDays(TOKEN_EXPIRE_DAYS).toDate())
-        .sign(this.hmacAlgorithm);
-
-    log.info("Granted parent ({}) config access for application '{}', token: '{}'.", parentApplication, application, token);
-
-    return TOKEN_PREFIX + token;
-  }
-
-  /**
-   * Verify privilege
-   *
-   * @param application            from context (URL path)
-   * @param parentApplication      from child config
-   * @param token                  from child config
-   * @param expectedParentPassword from parent config (may need to decrypt before verify)
-   * @return whether token, application in token and password in token valid
-   */
-  public Boolean verifyParentPassword(final String application, final String parentApplication, final String token, final String expectedParentPassword) {
-    final Boolean result;
-    if (!this.securityEnabled) {
-      result = isNotEmpty(application) && isNotEmpty(parentApplication);
-    } else {
-      final String rawParentPassword = this.decryptProperty(expectedParentPassword);
-
-      if (isNotEmpty(application) && isNotEmpty(token)) {
-        if (token.startsWith(TOKEN_PREFIX)) {
-          final String rawToken = token.replace(TOKEN_PREFIX, "");
-          // verify signature
-          final String encrypted = this.hmacVerifier.verify(rawToken).getClaim(TOKEN_CLAIM).asString();
-
-          // decrypt
-          final String plainText = this.encryptor.decrypt(encrypted);
-
-          // split
-          final Iterator<String> parts = CONCAT_PATTERN.splitAsStream(plainText).iterator();
-          final String random = parts.next();
-          final String encodedApplication = parts.next();
-          final String encodedParentApplication = parts.next();
-          final String encodedParentPassword = parts.next();
-
-          try {
-            result = this.passwordEncoder.matches(application, encodedApplication) &&
-                this.passwordEncoder.matches(parentApplication, encodedParentApplication) &&
-                this.passwordEncoder.matches(rawParentPassword, encodedParentPassword);
-          } catch (final Exception ignored) {
-            return FALSE;
-          }
-        } else {
-          final String rawToken = this.decryptProperty(token);
-          result = this.isPasswordMatch(rawParentPassword, rawToken);
-        }
-      } else {
-        if (isNotEmpty(application) && isNotEmpty(parentApplication)) {
-          result = this.isPasswordMatch(rawParentPassword, token);
-        } else {
-          result = FALSE;
-        }
-      }
+    public ConfigSecurity() {
+        this.passwordEncoder = new BCryptPasswordEncoder(BCRYPT_STRENGTH);
     }
-    return result;
-  }
 
-  Boolean isPasswordMatch(final String expected, final String actual) {
-    return (expected != null ? expected : "").equals(actual != null ? actual : "");
-  }
-
-  String decryptProperty(final String value) {
-    return decryptProperty(value, this.encryptor);
-  }
-
-  static String decryptProperty(final String value, final TextEncryptor encryptor) {
-    final String result;
-    if (isNotBlank(value) && value.startsWith("{cipher}")) {
-      final String base64 = value.replaceAll("\\{[^}]+\\}", "");
-      result = encryptor.decrypt(base64);
-    } else {
-      result = value;
+    static String decryptProperty(final String value, final TextEncryptor encryptor) {
+        final String result;
+        if (isNotBlank(value) && value.startsWith("{cipher}")) {
+            final String base64 = value.replaceAll("\\{[^}]+\\}", "");
+            result = encryptor.decrypt(base64);
+        } else {
+            result = value;
+        }
+        return result;
     }
-    return result;
-  }
+
+    /**
+     * By default, this is a {@link org.springframework.cloud.config.server.encryption.KeyStoreTextEncryptorLocator} instance.
+     */
+    @Autowired
+    public void setEncryptorLocator(final TextEncryptorLocator encryptorLocator) {
+        this.encryptor = encryptorLocator.locate(ImmutableMap.of());
+    }
+
+    @PostConstruct
+    @SneakyThrows
+    public void init() {
+        this.hmacAlgorithm = Algorithm.HMAC256(this.hmacSecret);
+        this.hmacVerifier = JWT.require(this.hmacAlgorithm)
+            .withIssuer(TOKEN_ISSUER)
+            .build(); //Reusable verifier instance
+    }
+
+    /**
+     * Generate a password (token) valid only for given application to access a given parent
+     *
+     * @param application       from child config
+     * @param parentApplication from child config
+     * @param parentPassword    from child config
+     * @return token valid for application only
+     */
+    public String encryptParentPassword(final String application, final String parentApplication, final String parentPassword) {
+        //if (!this.securityEnabled) {
+        //  return "";
+        //}
+
+        checkArgument(isNotBlank(application), "blank application");
+        checkArgument(isNotBlank(application), "blank parentApplication");
+        checkArgument(isNotBlank(application), "blank parentPassword");
+
+        // digest/hash
+        // random string (length 16)
+        final String randomString = random(16, 0, 0, true, true, null, new SecureRandom());
+        final String encodedApplication = this.passwordEncoder.encode(application);
+        final String encodedParentApplication = this.passwordEncoder.encode(parentApplication);
+        final String encodedParentPassword = this.passwordEncoder.encode(parentPassword);
+
+        // concat
+        final String plainText = randomString + ":" + encodedApplication + ":" + encodedParentApplication + ":" + encodedParentPassword;
+
+        // encrypt
+        final String encrypted = this.encryptor.encrypt(plainText);
+
+        // sign
+        final String token = JWT.create()
+            .withIssuer(TOKEN_ISSUER)
+            .withClaim(TOKEN_CLAIM, encrypted)
+            .withExpiresAt(now().plusDays(TOKEN_EXPIRE_DAYS).toDate())
+            .sign(this.hmacAlgorithm);
+
+        log.info("Granted parent ({}) config access for application '{}', token: '{}'.", parentApplication, application, token);
+
+        return TOKEN_PREFIX + token;
+    }
+
+    /**
+     * Verify privilege
+     *
+     * @param application            from context (URL path)
+     * @param parentApplication      from child config
+     * @param token                  from child config
+     * @param expectedParentPassword from parent config (may need to decrypt before verify)
+     * @return whether token, application in token and password in token valid
+     */
+    public Boolean verifyParentPassword(final String application, final String parentApplication, final String token, final String expectedParentPassword) {
+        final Boolean result;
+        if (!this.securityEnabled) {
+            result = isNotEmpty(application) && isNotEmpty(parentApplication);
+        } else {
+            final String rawParentPassword = this.decryptProperty(expectedParentPassword);
+
+            if (isNotEmpty(application) && isNotEmpty(token)) {
+                if (token.startsWith(TOKEN_PREFIX)) {
+                    final String rawToken = token.replace(TOKEN_PREFIX, "");
+                    // verify signature
+                    final String encrypted = this.hmacVerifier.verify(rawToken).getClaim(TOKEN_CLAIM).asString();
+
+                    // decrypt
+                    final String plainText = this.encryptor.decrypt(encrypted);
+
+                    // split
+                    final Iterator<String> parts = CONCAT_PATTERN.splitAsStream(plainText).iterator();
+                    final String random = parts.next();
+                    final String encodedApplication = parts.next();
+                    final String encodedParentApplication = parts.next();
+                    final String encodedParentPassword = parts.next();
+
+                    try {
+                        result = this.passwordEncoder.matches(application, encodedApplication) &&
+                            this.passwordEncoder.matches(parentApplication, encodedParentApplication) &&
+                            this.passwordEncoder.matches(rawParentPassword, encodedParentPassword);
+                    } catch (final Exception ignored) {
+                        return FALSE;
+                    }
+                } else {
+                    final String rawToken = this.decryptProperty(token);
+                    result = this.isPasswordMatch(rawParentPassword, rawToken);
+                }
+            } else {
+                if (isNotEmpty(application) && isNotEmpty(parentApplication)) {
+                    result = this.isPasswordMatch(rawParentPassword, token);
+                } else {
+                    result = FALSE;
+                }
+            }
+        }
+        return result;
+    }
+
+    Boolean isPasswordMatch(final String expected, final String actual) {
+        return (expected != null ? expected : "").equals(actual != null ? actual : "");
+    }
+
+    String decryptProperty(final String value) {
+        return decryptProperty(value, this.encryptor);
+    }
 }

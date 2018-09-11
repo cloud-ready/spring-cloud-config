@@ -22,83 +22,83 @@ import java.util.Set;
 @Slf4j
 public class GitParentSupportMultipleJGitEnvironmentRepository extends MultipleJGitEnvironmentRepository {
 
-  @Setter
-  private ConfigSecurity configSecurity;
+    @Setter
+    private ConfigSecurity configSecurity;
 
-  public GitParentSupportMultipleJGitEnvironmentRepository(final ConfigurableEnvironment environment) {
-    super(environment);
-  }
+    public GitParentSupportMultipleJGitEnvironmentRepository(final ConfigurableEnvironment environment) {
+        super(environment);
+    }
 
-  @Override
-  public Environment findOne(final String application, final String profile, final String label) {
-    final Environment currentApplicationEnv = super.findOne(application, profile, label);
+    @Override
+    public Environment findOne(final String application, final String profile, final String label) {
+        final Environment currentApplicationEnv = super.findOne(application, profile, label);
 
-    // load parents
-    final Set<String> history = newLinkedHashSet();
-    history.add(EnvironmentUtils.getApplicationName(currentApplicationEnv));
+        // load parents
+        final Set<String> history = newLinkedHashSet();
+        history.add(EnvironmentUtils.getApplicationName(currentApplicationEnv));
 
-    for (Environment parentEnv, applicationEnv = currentApplicationEnv; //
-         (parentEnv = getParentEnvironment(applicationEnv, label)) != null; //
-         applicationEnv = parentEnv) {
+        for (Environment parentEnv, applicationEnv = currentApplicationEnv; //
+             (parentEnv = getParentEnvironment(applicationEnv, label)) != null; //
+             applicationEnv = parentEnv) {
 
-      final String parentApplication = EnvironmentUtils.getParentApplication(applicationEnv);
+            final String parentApplication = EnvironmentUtils.getParentApplication(applicationEnv);
 
-      final String expectedParentPassword = EnvironmentUtils.getConfigPassword(parentEnv);
-      if (isNotBlank(expectedParentPassword)) {
-        final String token = EnvironmentUtils.getParentConfigPassword(applicationEnv);
-        final Boolean hasParentPrivilege = this.configSecurity.verifyParentPassword(application, parentApplication, token, expectedParentPassword);
-        if (!hasParentPrivilege) {
-          throw new BadCredentialsException("Invalid access to parent config '" + parentApplication + "'.");
+            final String expectedParentPassword = EnvironmentUtils.getConfigPassword(parentEnv);
+            if (isNotBlank(expectedParentPassword)) {
+                final String token = EnvironmentUtils.getParentConfigPassword(applicationEnv);
+                final Boolean hasParentPrivilege = this.configSecurity.verifyParentPassword(application, parentApplication, token, expectedParentPassword);
+                if (!hasParentPrivilege) {
+                    throw new BadCredentialsException("Invalid access to parent config '" + parentApplication + "'.");
+                }
+            }
+
+            if (history.contains(parentApplication)) {
+                log.warn("circular reference detected! ignore existed parent. application:{}, circular parentApplication:{}",
+                    application, parentApplication);
+                break;
+            } else {
+                history.add(parentApplication);
+            }
+
+            // application config first.
+            // PropertySources[n] will override (cover) the value in PropertySources[n+1] under same key.
+            currentApplicationEnv.getPropertySources().addAll(parentEnv.getPropertySources());
         }
-      }
 
-      if (history.contains(parentApplication)) {
-        log.warn("circular reference detected! ignore existed parent. application:{}, circular parentApplication:{}",
-            application, parentApplication);
-        break;
-      } else {
-        history.add(parentApplication);
-      }
-
-      // application config first.
-      // PropertySources[n] will override (cover) the value in PropertySources[n+1] under same key.
-      currentApplicationEnv.getPropertySources().addAll(parentEnv.getPropertySources());
+        return currentApplicationEnv;
     }
 
-    return currentApplicationEnv;
-  }
 
+    private Environment getParentEnvironment(final Environment environment, final String label) {
+        final String parentApplication = EnvironmentUtils.getParentApplication(environment);
+        if (parentApplication == null || isBlank(parentApplication)) {
+            return null;
+        }
+        final String parentLabel = EnvironmentUtils.getParentLabel(environment, label);
 
-  private Environment getParentEnvironment(final Environment environment, final String label) {
-    final String parentApplication = EnvironmentUtils.getParentApplication(environment);
-    if (parentApplication == null || isBlank(parentApplication)) {
-      return null;
+        Environment result = null;
+
+        String[] profiles = environment.getProfiles();
+        if (profiles == null || profiles.length == 0) {
+            profiles = new String[]{"default"};
+        }
+
+        for (final String profile : profiles) {
+            Environment found;
+            try {
+                found = super.findOne(parentApplication, profile, parentLabel);
+            } catch (final Exception exception) {
+                log.warn("error fetch parent exception! parentApplication:{}, profile:{}, parentLabel:{}",
+                    parentApplication, profile, parentLabel, exception);
+                throw exception;
+            }
+
+            if (result == null) {
+                result = found;
+            } else {
+                result.getPropertySources().addAll(found.getPropertySources());
+            }
+        }
+        return result;
     }
-    final String parentLabel = EnvironmentUtils.getParentLabel(environment, label);
-
-    Environment result = null;
-
-    String[] profiles = environment.getProfiles();
-    if (profiles == null || profiles.length == 0) {
-      profiles = new String[]{"default"};
-    }
-
-    for (final String profile : profiles) {
-      Environment found;
-      try {
-        found = super.findOne(parentApplication, profile, parentLabel);
-      } catch (final Exception exception) {
-        log.warn("error fetch parent exception! parentApplication:{}, profile:{}, parentLabel:{}",
-            parentApplication, profile, parentLabel, exception);
-        throw exception;
-      }
-
-      if (result == null) {
-        result = found;
-      } else {
-        result.getPropertySources().addAll(found.getPropertySources());
-      }
-    }
-    return result;
-  }
 }
