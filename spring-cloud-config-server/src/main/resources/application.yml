@@ -29,7 +29,7 @@ endpoints.health.sensitive: ${ENDPOINTS_HEALTH_SENSITIVE:false}
 security:
   basic.enabled: ${SPRING_SECURITY_ENABLED:true}
   user:
-    name: ${SECURITY_USER_NAME:admin}
+    name: ${SPRING_SECURITY_USER_NAME:admin}
     password: ${SPRING_SECURITY_USER_PASSWORD:admin_pass}
     role: ${SPRING_SECURITY_USER_ROLES:ACTUATOR, ADMIN, SUPERUSER, USER}
   hook:
