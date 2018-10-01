@@ -24,3 +24,4 @@ git.properties
 **/src/site/resources
 
 /spring-cloud-config-server/Dockerfile
+/spring-cloud-config-server/src/main/docker/deploy.zip
