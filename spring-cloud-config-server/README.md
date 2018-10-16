@@ -8,7 +8,7 @@ spring-cloud-config-server
 ## Local demostration
 
 1. Create a local docker network
-`docker network create --driver=bridge --ipv6 --ipam-driver=default --subnet=172.16.238.0/24 --subnet=2001:3984:3989::/64 local-network`
+`docker network create --driver=bridge --ipam-driver=default --subnet=172.16.238.0/24 local-network`
 
 2. Start up
 `docker-compose up`
