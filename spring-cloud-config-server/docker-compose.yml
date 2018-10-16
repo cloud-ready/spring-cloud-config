@@ -20,7 +20,7 @@ services:
     networks:
       local-network:
         ipv4_address: 172.16.238.18
-        ipv6_address: 2001:3984:3989::18
+        #ipv6_address: 2001:3984:3989::18
     ports:
     - "${EUREKA_INSTANCE_NONSECUREPORT:-8888}:${SERVER_PORT:-8888}"
     volumes:
@@ -36,7 +36,7 @@ networks:
       driver: default
       config:
       - subnet: 172.16.238.0/24
-      - subnet: 2001:3984:3989::/64
+      #- subnet: 2001:3984:3989::/64
 
 volumes:
   data:
