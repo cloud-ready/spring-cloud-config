@@ -70,7 +70,7 @@ services:
     #- standalone.eureka:standalone.eureka
     #- cloudbus:cloudbus
 
-    image: ${IMAGE_PREFIX:-cloudready/}spring-cloud-config-server:${IMAGE_TAG:-1.0.1}
+    image: ${IMAGE_PREFIX:-cloudready/}spring-cloud-config-server:${IMAGE_TAG:-1.0.1.U2}
     labels:
       deploy.config.commit: ${LABEL_DEPLOY_CONFIG_COMMIT:-unknown}
       deploy.config.name: ${LABEL_DEPLOY_CONFIG_NAME:-unknown}
