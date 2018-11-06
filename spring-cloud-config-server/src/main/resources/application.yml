@@ -44,7 +44,7 @@ eureka:
   client:
     enabled: ${EUREKA_CLIENT_ENABLED:true}
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@eureka-standalone:8761/eureka/}
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://user:user_pass@standalone.eureka:8761/eureka/}
     register-with-eureka: ${EUREKA_CLIENT_REGISTERWITHEUREKA:true}
   instance:
     health-check-url-path: ${endpoints.health.path:/health}
@@ -53,6 +53,11 @@ eureka:
     lease-renewal-interval-in-seconds: 10
     metadataMap:
       configPath: ${spring.cloud.config.server.prefix}
+      applicationId: ${spring.application.name}
+      management.context-path: ${management.endpoints.web.base-path:${management.context-path:/actuator}}
+      user.name: ${security.user.name:${spring.security.user.name:}}
+      user.password: ${security.user.password:${spring.security.user.password:}}
+      health.path: "health"
     prefer-ip-address: ${EUREKA_INSTANCE_PREFERIPADDRESS:false}
     status-page-url-path: ${endpoints.info.path:/info}
     # Registering a Secure Application
@@ -64,6 +69,19 @@ spring.autoconfigure.exclude:
 - org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration
 
 spring:
+  boot.admin:
+    client:
+      enabled: true
+      #health-url:
+      #management-url:
+      metadata:
+        user:
+          name: ${security.user.name:${spring.security.user.name:}}
+          password: ${security.user.password:${spring.security.user.password:}}
+      name: ${spring.application.name}
+      prefer-ip: false
+      #service-base-url:
+      #service-url:
   cloud:
     service-registry:
       # see: org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration
