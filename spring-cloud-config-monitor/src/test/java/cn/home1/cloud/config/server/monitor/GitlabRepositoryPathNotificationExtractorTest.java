@@ -7,14 +7,14 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
-
-import java.util.Map;
 
 /**
  * Created by zhanghaolun on 16/11/3.
@@ -32,7 +32,12 @@ public class GitlabRepositoryPathNotificationExtractorTest {
 
     @Test
     public void testGitPath() {
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.config.server.common-config.application:common");
+        // spring-boot 1.5.x
+        //org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.config.server.common-config.application:common");
+        // spring-boot 2.x
+        TestPropertyValues values = TestPropertyValues.of("spring.cloud.config.server.common-config.application=common");
+        values.applyTo(this.context);
+
         this.context.refresh();
         this.extractor = this.context.getBean(GitlabRepositoryPathNotificationExtractor.class);
 
@@ -52,7 +57,12 @@ public class GitlabRepositoryPathNotificationExtractorTest {
 
     @Test
     public void testCommonProductConfigPath() {
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.config.server.common-config.application:common-production");
+        // spring-boot 1.5.x
+        //org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment(this.context, "spring.cloud.config.server.common-config.application:common-production");
+        // spring-boot 2.x
+        TestPropertyValues values = TestPropertyValues.of("spring.cloud.config.server.common-config.application=common-production");
+        values.applyTo(this.context);
+
         this.context.refresh();
         extractor = this.context.getBean(GitlabRepositoryPathNotificationExtractor.class);
 

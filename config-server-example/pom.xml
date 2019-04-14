@@ -40,8 +40,8 @@
 
         <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId></dependency>
 
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-rolling-config</artifactId></dependency>
-        <dependency><groupId>cn.home1</groupId><artifactId>log4j2-test-config</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>cn.home1</groupId><artifactId>logback-gelf-config</artifactId></dependency>
+        <dependency><groupId>cn.home1</groupId><artifactId>logback-test-config</artifactId><scope>test</scope></dependency>
         <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><scope>runtime</scope></dependency>
 
         <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-config</artifactId><scope>runtime</scope></dependency>

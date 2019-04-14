@@ -9,6 +9,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import cn.home1.cloud.config.server.security.ConfigSecurity;
 import cn.home1.cloud.config.server.ssh.DeployKey;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import java.io.File;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.File;
 
 /**
  * see: {@link org.springframework.cloud.config.server.environment.EnvironmentController}
@@ -133,6 +135,7 @@ public class ConfigServer {
     @EnableConfigServer
     //@EnableEurekaClient
     @EnableDiscoveryClient
+    @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC")
     protected class ConfigServerConfiguration {
 
         /**

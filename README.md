@@ -17,3 +17,10 @@ spring-cloud-config
 
 
 see: http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.4.3.RELEASE/
+
+
+## Build this project
+
+```bash
+JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home" mvn -Dskip-artifacts=true -Dskip-quality=true help:active-profiles clean install spotbugs:spotbugs spotbugs:check pmd:pmd pmd:check
+```

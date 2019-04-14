@@ -13,6 +13,14 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import java.security.SecureRandom;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +31,6 @@ import org.springframework.cloud.config.server.encryption.TextEncryptorLocator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.security.SecureRandom;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
 
 @Slf4j
 public class ConfigSecurity {
@@ -139,6 +141,7 @@ public class ConfigSecurity {
      * @param expectedParentPassword from parent config (may need to decrypt before verify)
      * @return whether token, application in token and password in token valid
      */
+    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     public Boolean verifyParentPassword(final String application, final String parentApplication, final String token, final String expectedParentPassword) {
         final Boolean result;
         if (!this.securityEnabled) {

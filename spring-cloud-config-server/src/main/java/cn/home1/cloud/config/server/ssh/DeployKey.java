@@ -1,18 +1,19 @@
 package cn.home1.cloud.config.server.ssh;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.util.FileCopyUtils.copyToString;
 
 import cn.home1.cloud.config.server.util.Consts;
 import cn.home1.cloud.config.server.util.ResourceUtils;
 
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
-
-import java.io.File;
-import java.io.FileReader;
 
 @Slf4j
 public class DeployKey {
@@ -49,7 +50,7 @@ public class DeployKey {
 
     @SneakyThrows
     public String getPrivateKey() {
-        return copyToString(new FileReader(new File(this.getPrivateKeyPath())));
+        return copyToString(new InputStreamReader(new FileInputStream(this.getPrivateKeyPath()), UTF_8));
     }
 
     public String getPrivateKeyPath() {
@@ -58,7 +59,7 @@ public class DeployKey {
 
     @SneakyThrows
     public String getPublicKey() {
-        return copyToString(new FileReader(new File(this.getPublicKeyPath())));
+        return copyToString(new InputStreamReader(new FileInputStream(this.getPublicKeyPath()), UTF_8));
     }
 
     public String getPublicKeyPath() {

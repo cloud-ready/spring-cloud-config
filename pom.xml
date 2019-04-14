@@ -2,18 +2,17 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>cn.home1</groupId>
-        <artifactId>build-docker</artifactId>
-        <version>0.3.8</version>
-    </parent>
-
     <artifactId>spring-cloud-config</artifactId>
     <description>spring-cloud-config</description>
+    <groupId>cn.home1</groupId>
+    <modelVersion>4.0.0</modelVersion>
     <name>spring-cloud-config</name>
     <packaging>pom</packaging>
+    <parent>
+        <artifactId>cloud-ready-parent</artifactId>
+        <groupId>top.infra</groupId>
+        <version>2.0.4-SNAPSHOT</version>
+    </parent>
     <url>https://github.com/cloud-ready/spring-cloud-config</url>
     <version>2.0.1-SNAPSHOT</version>
 
@@ -32,12 +31,11 @@
     </scm>
 
     <properties>
-        <deps-spring-boot.version>0.2.3</deps-spring-boot.version>
+        <commons-io.version>2.6</commons-io.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <java-jwt.version>3.3.0</java-jwt.version>
         <log-config.version>0.2.0</log-config.version>
         <service-discovery.version>2.0.1-SNAPSHOT</service-discovery.version>
-        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
 
         <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
         <repositories.snapshots.updatePolicy>always</repositories.snapshots.updatePolicy>
@@ -79,19 +77,11 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>cn.home1</groupId>
-                <artifactId>deps-spring-boot-${spring-boot.version}</artifactId>
-                <version>${deps-spring-boot.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-
             <!-- @formatter:off -->
-            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-rolling-config</artifactId><version>${log-config.version}</version></dependency>
-            <dependency><groupId>cn.home1</groupId><artifactId>log4j2-test-config</artifactId><version>${log-config.version}</version><scope>test</scope></dependency>
+            <dependency><groupId>cn.home1</groupId><artifactId>logback-gelf-config</artifactId><version>${log-config.version}</version></dependency>
             <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>${service-discovery.version}</version></dependency>
 
+            <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>${commons-io.version}</version></dependency>
             <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId><version>${java-jwt.version}</version></dependency>
             <dependency><groupId>dnsjava</groupId><artifactId>dnsjava</artifactId><version>${dnsjava.version}</version></dependency>
             <!-- @formatter:on -->
