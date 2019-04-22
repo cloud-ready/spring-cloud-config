@@ -31,6 +31,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
 /**
  * see: https://github.com/spring-projects/spring-boot/issues/12323
@@ -39,7 +40,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
  */
 @Configuration
 @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
-@ConditionalOnProperty(prefix = "spring.security", name = "enabled", havingValue = "true")
+// @ConditionalOnProperty(prefix = "spring.security", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(SecurityProperties.class)
 @Import({SpringBootWebSecurityConfiguration.class, WebSecurityEnablerConfiguration.class,
     SecurityDataConfiguration.class})
@@ -52,7 +53,7 @@ public class ApplicationSecurityAutoConfiguration {
         return new DefaultAuthenticationEventPublisher(publisher);
     }
 
-    @ConditionalOnProperty(prefix = "spring.security", name = "enabled", havingValue = "true")
+    // @ConditionalOnProperty(prefix = "spring.security", name = "enabled", havingValue = "true")
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     //@Order(ApplicationSecurityAutoConfiguration.ACCESS_OVERRIDE_ORDER)
@@ -71,6 +72,9 @@ public class ApplicationSecurityAutoConfiguration {
         @Autowired
         private ConfigServerProperties configServerProperties;
 
+        @Value("${spring.security.enabled:false}")
+        private Boolean enabled;
+
         @Autowired
         private EnvironmentController environmentController;
 
@@ -87,47 +91,64 @@ public class ApplicationSecurityAutoConfiguration {
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.userDetailsService(this.userDetailsService()).passwordEncoder(NoOpPasswordEncoder.getInstance());
+            if (this.enabled) {
+                auth.userDetailsService(this.userDetailsService()).passwordEncoder(NoOpPasswordEncoder.getInstance());
+            }
         }
 
         @Override
-        protected void configure(final HttpSecurity http) throws Exception {
+        protected void configure(HttpSecurity http) throws Exception {
             final String configServerPrefix = this.configServerProperties.getPrefix();
             //final String loginEndpoint = configServerPrefix + "/users/login";
             final String monitorEndpoint = configServerPrefix + "/monitor";
 
             //super.configure(http); // default config
+            if (this.enabled) {
+                http = http //
+                    .authorizeRequests() //
+                    .requestMatchers(EndpointRequest.to("health", "info")).permitAll() //
+                    .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(ACTUATOR.toString()) //
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //
+                    .antMatchers(configServerPrefix + "/").permitAll() //
+                    .antMatchers(configServerPrefix + "/deployKeyPublic").permitAll() //
+                    .antMatchers(configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
+                    .antMatchers(configServerPrefix + "/encrypt", monitorEndpoint).permitAll() //
+                    .antMatchers(configServerPrefix + "/encryptParentPassword").hasRole(ADMIN.toString()) //
+                    .antMatchers(configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
+                    .antMatchers(new String[]{ //
+                        configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
+                        configServerPrefix + "/{application}/{profiles}/{label:.*}", //
+                        configServerPrefix + "/{application}-{profiles}.json", //
+                        configServerPrefix + "/{label}/{application}-{profiles}.json", //
+                        configServerPrefix + "/{application}-{profiles}.properties", //
+                        configServerPrefix + "/{application}/{name}-{profiles}.properties", //
+                        configServerPrefix + "/{application}-{profiles}.yml", //
+                        configServerPrefix + "/{application}-{profiles}.yaml", //
+                        configServerPrefix + "/{label}/{application}-{profiles}.yml", //
+                        configServerPrefix + "/{label}/{application}-{profiles}.yaml", //
+                        configServerPrefix + "/{application}/{profiles}/{label}/**", //
+                    }).access("@applicationConfigSecurity.checkAuthentication(#application,#profiles)")//
+                    .anyRequest().hasRole(ADMIN.toString()) //
+                    //.antMatchers("/**").hasRole(USER.toString()) //
+                    .and() //
+                    .httpBasic().and() //
+                    .sessionManagement().sessionCreationPolicy(STATELESS).and() //
+                    .exceptionHandling()
+                    // .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) //
+                    .authenticationEntryPoint(new BasicAuthenticationEntryPoint()) //
+                    .and() //
+                ;
+            } else {
+                http = http //
+                    .authorizeRequests() //
+                    .antMatchers("/**").permitAll() //
+                    .and() //
+                ;
+            }
+
             http //
-                .authorizeRequests() //
-                .requestMatchers(EndpointRequest.to("health", "info")).permitAll() //
-                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(ACTUATOR.toString()) //
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //
-                .antMatchers(configServerPrefix + "/").permitAll() //
-                .antMatchers(configServerPrefix + "/deployKeyPublic").permitAll() //
-                .antMatchers(configServerPrefix + "/decrypt").hasRole(ADMIN.toString()) //
-                .antMatchers(configServerPrefix + "/encrypt", monitorEndpoint).permitAll() //
-                .antMatchers(configServerPrefix + "/encryptParentPassword").hasRole(ADMIN.toString()) //
-                .antMatchers(configServerPrefix + "/monitor").hasAnyRole(ADMIN.toString(), HOOK.toString()) //
-                .antMatchers(new String[]{ //
-                    configServerPrefix + "/{application}/{profiles:.*[^-].*}", //
-                    configServerPrefix + "/{application}/{profiles}/{label:.*}", //
-                    configServerPrefix + "/{application}-{profiles}.json", //
-                    configServerPrefix + "/{label}/{application}-{profiles}.json", //
-                    configServerPrefix + "/{application}-{profiles}.properties", //
-                    configServerPrefix + "/{application}/{name}-{profiles}.properties", //
-                    configServerPrefix + "/{application}-{profiles}.yml", //
-                    configServerPrefix + "/{application}-{profiles}.yaml", //
-                    configServerPrefix + "/{label}/{application}-{profiles}.yml", //
-                    configServerPrefix + "/{label}/{application}-{profiles}.yaml", //
-                    configServerPrefix + "/{application}/{profiles}/{label}/**", //
-                }).access("@applicationConfigSecurity.checkAuthentication(#application,#profiles)")//
-                .anyRequest().hasRole(ADMIN.toString()) //
-                //.antMatchers("/**").hasRole(USER.toString()) //
-                .and() //
                 .csrf().disable() //
                 .formLogin().disable() //
-                .httpBasic().and() //
-                .sessionManagement().sessionCreationPolicy(STATELESS).and() //
             ;
         }
 

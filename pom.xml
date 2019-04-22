@@ -30,20 +30,10 @@
         <url>https://github.com/cloud-ready/spring-cloud-config</url>
     </scm>
 
-    <properties>
-        <commons-io.version>2.6</commons-io.version>
-        <dnsjava.version>2.1.7</dnsjava.version>
-        <java-jwt.version>3.3.0</java-jwt.version>
-        <log-config.version>0.2.0</log-config.version>
-        <service-discovery.version>2.0.1-SNAPSHOT</service-discovery.version>
-
-        <repositories.releases.updatePolicy>always</repositories.releases.updatePolicy>
-        <repositories.snapshots.updatePolicy>always</repositories.snapshots.updatePolicy>
-    </properties>
-
     <build>
         <pluginManagement>
             <plugins>
+                <!-- @formatter:off -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
@@ -51,26 +41,18 @@
                     <configuration>
                         <classifier>exec</classifier>
                         <layout>ZIP</layout>
-                        <!-- @formatter:off -->
                         <excludes>
                             <exclude><groupId>org.inferred</groupId><artifactId>freebuilder</artifactId></exclude>
                             <exclude><groupId>com.google.auto.value</groupId><artifactId>auto-value</artifactId></exclude>
                             <exclude><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId></exclude>
                         </excludes>
-                        <!-- @formatter:on -->
                     </configuration>
                     <executions>
-                        <execution>
-                            <goals>
-                                <goal>build-info</goal>
-                                <goal>repackage</goal>
-                            </goals>
-                            <configuration>
-                                <attach>false</attach>
-                            </configuration>
-                        </execution>
+                        <execution><id>build-info</id><goals><goal>build-info</goal></goals></execution>
+                        <execution><id>repackage</id><goals><goal>repackage</goal></goals><configuration><attach>false</attach></configuration></execution>
                     </executions>
                 </plugin>
+                <!-- @formatter:on -->
             </plugins>
         </pluginManagement>
     </build>
@@ -105,21 +87,33 @@
 
     <profiles>
         <profile>
+            <id>default-docker-image-prefix</id>
+            <activation><property><name>!docker.image.prefix</name></property><activeByDefault>false</activeByDefault></activation>
+            <properties>
+                <docker.image.prefix>cloudready/</docker.image.prefix>
+            </properties>
+        </profile>
+        <profile>
             <!-- Build examples at local, skip build examples on CI -->
             <id>build-examples</id>
-            <activation>
-                <property>
-                    <name>!site</name>
-                </property>
-                <activeByDefault>false</activeByDefault>
-            </activation>
+            <activation><property><name>!site</name></property><activeByDefault>false</activeByDefault></activation>
             <modules>
                 <module>spring-cloud-config-server</module>
                 <module>spring-cloud-config-monitor</module>
-                <module>config-server-example</module>
+                <!--<module>config-server-example</module>-->
             </modules>
         </profile>
     </profiles>
+
+    <properties>
+        <commons-io.version>2.6</commons-io.version>
+        <dnsjava.version>2.1.7</dnsjava.version>
+        <java-jwt.version>3.3.0</java-jwt.version>
+        <service-discovery.version>2.0.1-SNAPSHOT</service-discovery.version>
+
+        <repositories.releases.updatePolicy>never</repositories.releases.updatePolicy>
+        <repositories.snapshots.updatePolicy>daily</repositories.snapshots.updatePolicy>
+    </properties>
 
     <!-- @formatter:off -->
     <repositories>
@@ -143,7 +137,7 @@
         <pluginRepository>
             <id>central</id>
             <name>central</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
             <releases><enabled>true</enabled><updatePolicy>${repositories.releases.updatePolicy}</updatePolicy></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </pluginRepository>

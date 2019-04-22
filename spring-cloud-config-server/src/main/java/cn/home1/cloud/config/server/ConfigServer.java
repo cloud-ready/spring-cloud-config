@@ -120,15 +120,15 @@ public class ConfigServer {
         return this.configSecurity.encryptParentPassword(application, parentApplication, parentPassword);
     }
 
-    @Configuration
-    public static class HealthIndicatorConfiguration {
-
-        @Bean
-        @ConditionalOnProperty(value = "spring.cloud.config.server.health.enabled", matchIfMissing = true)
-        public ConfigServerHealthIndicator configServerHealthIndicator(final EnvironmentRepository repository) {
-            return new ConfigServerHealthIndicator(repository);
-        }
-    }
+    // @Configuration
+    // public static class HealthIndicatorConfiguration {
+    //
+    //     @Bean
+    //     @ConditionalOnProperty(value = "spring.cloud.config.server.health.enabled", matchIfMissing = true)
+    //     public ConfigServerHealthIndicator configServerHealthIndicator(final EnvironmentRepository repository) {
+    //         return new ConfigServerHealthIndicator(repository);
+    //     }
+    // }
 
     @Configuration
     @EnableAutoConfiguration
