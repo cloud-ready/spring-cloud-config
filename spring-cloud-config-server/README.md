@@ -17,11 +17,11 @@ spring-cloud-config-server
 > default admin username/password is `admin/admin_pass`
 
 config repositories for demo (default) instance of config-server:
-- [health-check](https://github.com/spring-cloud-config-server/health-check-config)
+- [health-check](https://gitlab.com/spring-cloud-config-server/health-check-config)
 > repo for config-server's health check
-- [demo-app](https://github.com/spring-cloud-config-server/demo-app-config)
+- [demo-app](https://gitlab.com/spring-cloud-config-server/demo-app-config)
 > application config repo, default branch (label) is develop
-- [demo-app-common](https://github.com/spring-cloud-config-server/demo-app-common-config)
+- [demo-app-common](https://gitlab.com/spring-cloud-config-server/demo-app-common-config)
 > parent config repo of demo-app, default branch (label) is develop
 
 config-server supports following url patterns ({profiles} is a comma splitted list, {label} is git ref name)

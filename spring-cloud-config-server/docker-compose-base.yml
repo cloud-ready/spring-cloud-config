@@ -23,8 +23,8 @@ services:
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
 
     # config-server
-    - GIT_PREFIX=${GIT_PREFIX:-https://github.com:443/spring-cloud-config-server}
-    #- GIT_PREFIX=${GIT_PREFIX:-ssh://git@github.com:22/spring-cloud-config-server}
+    - GIT_PREFIX=${GIT_PREFIX:-https://gitlab.com:443/spring-cloud-config-server}
+    #- GIT_PREFIX=${GIT_PREFIX:-ssh://git@gitlab.com:22/spring-cloud-config-server}
 
     - JAVA_DEBUG_PORT=${JAVA_DEBUG_PORT}
 

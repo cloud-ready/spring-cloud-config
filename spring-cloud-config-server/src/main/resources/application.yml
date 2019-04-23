@@ -123,7 +123,7 @@ spring:
           strict-host-key-checking: ${SPRING_CLOUD_CONFIG_SERVER_GIT_STRICTHOSTKEYCHECKING:false}
           timeout: ${SPRING_CLOUD_CONFIG_SERVER_GIT_TIMEOUT:30}
           #uri: ${GIT_PREFIX:ssh://git@gitlab:20022/spring-cloud-config-server}/{application}-config.git
-          uri: ${GIT_PREFIX:https://github.com/spring-cloud-config-server}/{application}-config.git
+          uri: ${GIT_PREFIX:https://gitlab.com/spring-cloud-config-server}/{application}-config.git
         # see: org.springframework.cloud.config.monitor.EnvironmentMonitorAutoConfiguration
         monitor:
           bitbucket.enabled: ${SPRING_CLOUD_CONFIG_SERVER_MONITOR_BITBUCKET_ENABLED:false}
