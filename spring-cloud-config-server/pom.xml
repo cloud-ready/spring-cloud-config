@@ -33,6 +33,8 @@
 
     <dependencies>
         <!-- @formatter:off -->
+        <dependency><groupId>de.codecentric</groupId><artifactId>spring-boot-admin-starter-client</artifactId></dependency>
+
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-configuration-processor</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-properties-migrator</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
@@ -53,6 +55,13 @@
         <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId></dependency>
         <dependency><groupId>dnsjava</groupId><artifactId>dnsjava</artifactId></dependency>
         <dependency><groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId></dependency>
+
+        <!--<dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-graphite</artifactId></dependency>-->
+        <!--
+        see: http://ignaciosuay.com/how-to-visualize-spring-boot-2-metrics-with-prometheus/
+        /actuator/prometheus
+        -->
+        <dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>
         <!-- @formatter:on -->
     </dependencies>
 </project>

@@ -93,7 +93,7 @@ public class ConfigServer {
     @ResponseBody
     @RequestMapping(path = {"/", "${spring.cloud.config.server.prefix:}/"}, method = GET)
     public String index() {
-        return "Visit https://gitlab.com/cloud-ready/spring-cloud-config-server for more info.";
+        return "Visit https://github.com/cloud-ready/spring-cloud-config-server for more info.";
     }
 
     @ResponseBody

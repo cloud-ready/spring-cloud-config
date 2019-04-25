@@ -32,6 +32,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
 
 /**
  * see: https://github.com/spring-projects/spring-boot/issues/12323
@@ -87,6 +89,7 @@ public class ApplicationSecurityAutoConfiguration {
         @Override
         public void init(final WebSecurity web) throws Exception {
             super.init(web);
+            web.httpFirewall(this.allowUrlEncodedSlashHttpFirewall());
         }
 
         @Override
@@ -170,6 +173,16 @@ public class ApplicationSecurityAutoConfiguration {
             userDetailsService.setPrivilegedUserProperties(this.privilegedUserProperties());
             userDetailsService.setEnvironmentController(this.environmentController);
             return userDetailsService;
+        }
+
+        @Bean
+        public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+            // allow urls like "/eureka//apps/SERVICE-FILTER-TEST-APPLICATION"
+            // see: https://stackoverflow.com/questions/48453980/spring-5-0-3-requestrejectedexception-the-request-was-rejected-because-the-url
+            final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+            // final StrictHttpFirewall firewall = new StrictHttpFirewall();
+            // firewall.setAllowUrlEncodedSlash(true);
+            return firewall;
         }
     }
 }

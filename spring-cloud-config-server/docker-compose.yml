@@ -4,19 +4,24 @@ services:
     extends:
       file: docker-compose-base.yml
       service: base-config-server
-    container_name: ${CONTAINER_HOST_NAME:-config-server}
+    container_name: ${CONTAINER_HOST_NAME:-standalone.config-server}
     environment:
     - AUTH_CONFIG_SEARCHPATHS=${AUTH_CONFIG_SEARCHPATHS:-auth-label-{label},auth-profile-{profile}}
 
     - EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED:-true}
-    - EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-true}
+    #- EUREKA_CLIENT_REGISTERWITHEUREKA=${EUREKA_CLIENT_REGISTERWITHEUREKA:-true}
+    - EUREKA_INSTANCE_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-standalone.config-server}
     - EUREKA_INSTANCE_NONSECUREPORT=${EUREKA_INSTANCE_NONSECUREPORT:-8888}
 
     - LOGGING_LEVEL_ROOT=${LOGGING_LEVEL_ROOT:-INFO}
 
     - SERVER_PORT=${SERVER_PORT:-8888}
+    - SERVICE_REGISTER_ENABLED=${SERVICE_REGISTER_ENABLED:-true}
 
-    hostname: ${CONTAINER_HOST_NAME:-config-server}
+    - SPRING_CLOUD_CLIENT_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-standalone.config-server}
+    - SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME=${EUREKA_INSTANCE_HOSTNAME:-standalone.config-server}
+    #- SPRING_CLOUD_SERVICEREGISTRY_AUTOREGISTRATION_ENABLED=${SPRING_CLOUD_SERVICEREGISTRY_AUTOREGISTRATION_ENABLED:-true}
+    hostname: ${CONTAINER_HOST_NAME:-standalone.config-server}
     networks:
       local-network:
         ipv4_address: 172.16.238.18

@@ -60,7 +60,6 @@
     <dependencyManagement>
         <dependencies>
             <!-- @formatter:off -->
-            <dependency><groupId>cn.home1</groupId><artifactId>logback-gelf-config</artifactId><version>${log-config.version}</version></dependency>
             <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>${service-discovery.version}</version></dependency>
 
             <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>${commons-io.version}</version></dependency>

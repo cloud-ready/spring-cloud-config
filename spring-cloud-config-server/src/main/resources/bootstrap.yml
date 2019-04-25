@@ -5,7 +5,8 @@ spring:
     config:
       enabled: false
     consul:
-      host: ${SPRING_CLOUD_CONSUL_HOST:consul}
+      config.enabled: ${SPRING_CLOUD_CONSUL_CONFIG_ENABLED:false}
+      host: ${SPRING_CLOUD_CONSUL_HOST:standalone.consul}
       port: ${SPRING_CLOUD_CONSUL_PORT:8500}
 
 
