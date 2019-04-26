@@ -55,7 +55,7 @@ services:
 
 
 
-    - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-development.env,manual_ip_hostname,port_nonsecure}
+    - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-development.env}
     - SPRING_SECURITY_USER_PASSWORD=${SPRING_SECURITY_USER_PASSWORD:-admin_pass}
 
     # monitor/rabbitmq

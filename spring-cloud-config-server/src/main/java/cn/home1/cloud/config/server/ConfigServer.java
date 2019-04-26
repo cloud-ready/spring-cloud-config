@@ -1,6 +1,5 @@
 package cn.home1.cloud.config.server;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -22,18 +21,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.config.server.EnableConfigServer;
-import org.springframework.cloud.config.server.config.ConfigServerHealthIndicator;
-import org.springframework.cloud.config.server.environment.EnvironmentRepository;
 import org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentProperties;
 import org.springframework.cloud.config.server.ssh.FileBasedSshTransportConfigCallback;
 import org.springframework.cloud.config.server.ssh.PropertiesBasedSshTransportConfigCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,11 +49,11 @@ public class ConfigServer {
 
     static {
         // set default profiles
-        final String profilesFromEnv = System.getenv("SPRING_PROFILES_ACTIVE");
-        final String profilesFromProperty = System.getProperty("spring.profiles.active", "");
-        if (isBlank(profilesFromEnv) && isBlank(profilesFromProperty)) {
-            System.setProperty("spring.profiles.active", "port_nonsecure");
-        }
+        // final String profilesFromEnv = System.getenv("SPRING_PROFILES_ACTIVE");
+        // final String profilesFromProperty = System.getProperty("spring.profiles.active", "");
+        // if (isBlank(profilesFromEnv) && isBlank(profilesFromProperty)) {
+        //     System.setProperty("spring.profiles.active", "default_profiles");
+        // }
 
         // set deploy key
         final String deployKeyFromEnv = System.getenv("SPRING_CLOUD_CONFIG_SERVER_GIT_DEPLOYKEY");
@@ -81,8 +76,8 @@ public class ConfigServer {
         }
     }
 
-    @Autowired
-    private Environment environment;
+    // @Autowired
+    // private Environment environment;
     @Autowired
     private ConfigSecurity configSecurity;
 
