@@ -22,5 +22,13 @@ see: http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.4.3.RELEAS
 ## Build this project
 
 ```bash
-JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home" mvn -Dskip-artifacts=true -Dskip-quality=true help:active-profiles clean install spotbugs:spotbugs spotbugs:check pmd:pmd pmd:check
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/openjdk-11.0.2.jdk/Contents/Home"
+# or
+#export JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
+
+./mvnw -e -ntp -U clean install
+
+./mvnw -e -ntp -U clean install sonar:sonar site deploy site-deploy
+
+#./mvnw -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -DgenerateReports=false help:active-profiles clean install spotbugs:spotbugs spotbugs:check pmd:pmd pmd:check
 ```

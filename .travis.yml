@@ -2,64 +2,84 @@
 addons:
   apt:
     packages:
-    - aria2
-    #- gnupg
-    - gnupg2
-    - graphviz
-    - openssl
-    - whois
+      - aria2
+      - gnupg2
+      - graphviz
+      - openssl
+      - rsync
+      - sshpass
+      - whois
 before_install:
-- whois $(curl ipinfo.io/ip)
-- if [ -d /usr/lib/jvm/java-8-oracle ]; then sudo ln -s /usr/lib/jvm/java-8-oracle /usr/lib/jvm/java-8-openjdk; fi
-- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-- bash install-jdk.sh -F 11 --target $HOME/openjdk11 --workspace $HOME/.cache/install-jdk
-- if [ -d /home/travis/openjdk11 ]; then sudo mkdir -p /usr/lib/jvm; sudo ln -s /home/travis/openjdk11 /usr/lib/jvm/java-11-openjdk; fi
-- export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
-- aria2c --file-allocation=none -c -x 10 -s 10 -m 0 --console-log-level=notice --log-level=notice --summary-interval=0 -o apache-maven-3.6.0-bin.zip https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.zip && unzip -qq apache-maven-3.6.0-bin.zip
-- export M2_HOME=$PWD/apache-maven-3.6.0
-- export PATH=$M2_HOME/bin:$PATH
+  - set -ex;
+  - whois $(curl ipinfo.io/ip);
+  # More options -> Settings -> Environment variables -> Add
+  # CI_OPT_GPG_PASSPHRASE
+  # CI_OPT_ORIGIN_REPO_SLUG
+  # CI_OPT_OSSRH_DOCKER_REGISTRY_PASS
+  # CI_OPT_OSSRH_DOCKER_REGISTRY_USER
+  # CI_OPT_OSSRH_GIT_AUTH_TOKEN
+  # CI_OPT_OSSRH_MVNSITE_PASSWORD
+  # CI_OPT_OSSRH_MVNSITE_USERNAME
+  # CI_OPT_OSSRH_NEXUS2_PASS
+  # CI_OPT_OSSRH_NEXUS2_USER
+  # CI_OPT_OSSRH_SONAR_LOGIN
+  - if [[ -d /usr/lib/jvm/java-8-openjdk-amd64 ]]; then sudo ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-openjdk; fi;
+    if [[ -d /usr/lib/jvm/java-11-openjdk-amd64 ]]; then sudo ln -s /usr/lib/jvm/java-11-openjdk-amd64 /usr/lib/jvm/java-11-openjdk; fi;
+  - curl -sSL https://github.com/sormuras/bach/raw/master/install-jdk.sh | bash -s -- -F 11 --target $HOME/openjdk11 --workspace $HOME/.cache/install-jdk;
+    if [[ -d $HOME/openjdk11 ]]; then sudo ln -s $HOME/openjdk11 /usr/lib/jvm/java-11-openjdk; fi;
+  - export JAVA_HOME="/usr/lib/jvm/java-11-openjdk";
+  - export CI_OPT_MVN_MULTI_STAGE_BUILD="false";
+    source circ.sh;
+  #- export MAVEN_GLOBAL_SETTINGS="--global-settings ${SETTINGS_GLOBAL_XML}";
+  - if [[ -z "${MAVEN_OPTS}" ]]; then export MAVEN_OPTS="-XX:+UseParallelGC -Dmaven.repo.local=.m2/repository -Dprofile=title -DprofileFormat=JSON,HTML"; fi;
+    if [[ -d ${HOME}/.m2 ]]; then rm -rf ${HOME}/.m2/repository/top/infra/maven; ls -ahl ${HOME}/.m2; fi;
+    export MAVEN_USER_HOME="${PWD}/.m2";
+    ./mvnw ${MAVEN_GLOBAL_SETTINGS} -version;
 branches:
   only:
-  #- master # do nothing on master branch
-  - develop # snapshots on develop branch
-  - /^feature\/.*$/ # build and test on feature branches
-  - /^hotfix\/.*$/ # release on hotfix branches
-  - /^release\/.*$/ # release on release branches
-  - /^support\/.*$/ # release on support branches
-  #- /^v\d+\.\d+(\.\d+)?(-\S*)?/ # build and publish a github release (can skip tests here) or do nothing on version tags
+    #- master # do nothing on master branch
+    - develop # snapshots on develop branch
+    - /^feature\/.*$/ # build and test on feature branches
+    - /^hotfix\/.*$/ # release on hotfix branches
+    - /^release\/.*$/ # release on release branches
+    - /^support\/.*$/ # release on support branches
+    #- /^v\d+\.\d+(\.\d+)?(-\S*)?/ # build and publish a github release (can skip tests here) or do nothing on version tags
 cache:
   directories:
-  - "$HOME/.cache"
-  - "$HOME/.gradle"
-  - "$HOME/.m2"
-  - "$HOME/.sonar/cache"
+    - "$HOME/.cache"
+    - "$HOME/.gradle"
+    - "$HOME/.m2/repository"
+    - "$HOME/.m2/wrapper"
+    - "$HOME/.sonar/cache"
 
-dist: trusty
+dist: xenial
 env:
   global:
-  - TRAVIS_ENABLED=true
-  - CI_INFRA_OPT_GIT_PREFIX=https://github.com
-  - CI_OPT_MAVEN_EFFECTIVE_POM=true
-  - MAVEN_SKIP_RC=true
+    - MAVEN_SKIP_RC=true
 group: edge
 install: true
 jdk:
-- oraclejdk8
-#- oraclejdk9
-language: java
+  - openjdk8
+  #- openjdk11
+#language: java
+language: ruby
+rvm:
+  - 2.0
 script:
-# When prefixed with `travis_wait 30`, no log output until it is done.
-# see: https://github.com/travis-ci/travis-ci/issues/4190 or https://github.com/HaxeFoundation/hxcpp/issues/709
-- while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
-- if [[ "${TRAVIS_BRANCH}" =~ ^release/.+ ]] || [[ "${TRAVIS_BRANCH}" =~ ^support/.+ ]]; then export CI_OPT_GITHUB_SITE_PUBLISH=true; else export CI_OPT_GITHUB_SITE_PUBLISH=false; fi;
-  if [ "${TRAVIS_ENABLED}" == "true" ]; then
-    if [ "${CI_OPT_GITHUB_SITE_PUBLISH}" == "true" ]; then
-      bash ci.sh mvn clean install sonar:sonar site deploy site-deploy;
-    else
-      bash ci.sh mvn clean install sonar:sonar site deploy site:stage site:stage-deploy;
-    fi;
-  fi
-- kill %1
+  # When prefixed with `travis_wait 30`, no log output until it is done.
+  # see: https://github.com/travis-ci/travis-ci/issues/4190 or https://github.com/HaxeFoundation/hxcpp/issues/709
+  - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - if [[ "${TRAVIS_ENABLED}" == "true" ]]; then
+      time CI_OPT_SONAR="true" ./mvnw ${MAVEN_GLOBAL_SETTINGS} -e -ntp -U clean deploy;
+      if type -p column > /dev/null; then find .mvn/profiler-report -name "*.json" | xargs cat | jq -r '.projects[]|"module:", .project, "plugins", (.mojos[]|[.mojo,.time]|@tsv)' | column -t; fi; rm -rf .mvn/profiler-report;
+
+      time CI_OPT_FAST="true" CI_OPT_INFRASTRUCTURE="custom" CI_OPT_MVN_MULTI_STAGE_BUILD="true" CI_OPT_NEXUS2_STAGING="false" ./mvnw ${MAVEN_GLOBAL_SETTINGS} -e -ntp deploy;
+      if type -p column > /dev/null; then find .mvn/profiler-report -name "*.json" | xargs cat | jq -r '.projects[]|"module:", .project, "plugins", (.mojos[]|[.mojo,.time]|@tsv)' | column -t; fi; rm -rf .mvn/profiler-report;
+
+      time ./mvnw ${MAVEN_GLOBAL_SETTINGS} -e -ntp site-deploy;
+      if type -p column > /dev/null; then find .mvn/profiler-report -name "*.json" | xargs cat | jq -r '.projects[]|"module:", .project, "plugins", (.mojos[]|[.mojo,.time]|@tsv)' | column -t; fi; rm -rf .mvn/profiler-report;
+    fi
+  - kill %1
 services:
-- docker
+  - docker
 sudo: required

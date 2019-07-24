@@ -166,6 +166,7 @@ public class ApplicationSecurityAutoConfiguration {
         }
 
         @Bean
+        @Override
         public GitFileConfigUserDetailsService userDetailsService() {
             final GitFileConfigUserDetailsService userDetailsService = new GitFileConfigUserDetailsService();
             userDetailsService.setConfigSecurity(this.configSecurity);

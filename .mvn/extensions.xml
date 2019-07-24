@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+see:
+[Add ability to easily retrieve core extensions from alternative pluginRepository](https://issues.apache.org/jira/browse/MNG-6327)
+[Maven core extension resolution ignores repositories from activeByDefault profiles in settings.xml](https://issues.apache.org/jira/browse/MNG-5984)
+-->
+<extensions>
+    <extension>
+        <groupId>fr.jcgay.maven</groupId>
+        <artifactId>maven-profiler</artifactId>
+        <version>2.6</version>
+    </extension>
+
+    <!-- @formatter:off -->
+    <extension><artifactId>topinfra-maven-extension</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-docker</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-gitflow-semver</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-gpg-key</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-infrastructure-settings</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-maven-build-pom</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <extension><artifactId>topinfra-mvnext-module-settings-security</artifactId><groupId>top.infra.maven</groupId><version>1.0.9-SNAPSHOT</version></extension>
+    <!-- @formatter:on -->
+</extensions>

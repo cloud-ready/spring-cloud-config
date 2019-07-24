@@ -10,11 +10,11 @@
     <packaging>pom</packaging>
     <parent>
         <artifactId>cloud-ready-parent</artifactId>
-        <groupId>top.infra</groupId>
-        <version>2.0.4-SNAPSHOT</version>
+        <groupId>top.infra.cloud-ready</groupId>
+        <version>3.0.5-SNAPSHOT</version>
     </parent>
     <url>https://github.com/cloud-ready/spring-cloud-config</url>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
 
     <ciManagement>
         <system>Travis CI</system>
@@ -37,15 +37,16 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
+                    <version>${version.spring-boot}</version>
                     <configuration>
                         <classifier>exec</classifier>
-                        <layout>ZIP</layout>
                         <excludes>
                             <exclude><groupId>org.inferred</groupId><artifactId>freebuilder</artifactId></exclude>
                             <exclude><groupId>com.google.auto.value</groupId><artifactId>auto-value</artifactId></exclude>
                             <exclude><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId></exclude>
                         </excludes>
+                        <layout>ZIP</layout>
+                        <skip>${maven.packages.skip}</skip>
                     </configuration>
                     <executions>
                         <execution><id>build-info</id><goals><goal>build-info</goal></goals></execution>
@@ -60,11 +61,11 @@
     <dependencyManagement>
         <dependencies>
             <!-- @formatter:off -->
-            <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>${service-discovery.version}</version></dependency>
+            <dependency><groupId>cn.home1</groupId><artifactId>spring-cloud-multi-registration</artifactId><version>${version.service-discovery}</version></dependency>
 
-            <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>${commons-io.version}</version></dependency>
-            <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId><version>${java-jwt.version}</version></dependency>
-            <dependency><groupId>dnsjava</groupId><artifactId>dnsjava</artifactId><version>${dnsjava.version}</version></dependency>
+            <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>${version.commons-io}</version></dependency>
+            <dependency><groupId>com.auth0</groupId><artifactId>java-jwt</artifactId><version>${version.java-jwt}</version></dependency>
+            <dependency><groupId>dnsjava</groupId><artifactId>dnsjava</artifactId><version>${version.dnsjava}</version></dependency>
             <!-- @formatter:on -->
         </dependencies>
     </dependencyManagement>
@@ -105,25 +106,27 @@
     </profiles>
 
     <properties>
-        <commons-io.version>2.6</commons-io.version>
-        <dnsjava.version>2.1.7</dnsjava.version>
-        <java-jwt.version>3.3.0</java-jwt.version>
-        <service-discovery.version>2.0.1-SNAPSHOT</service-discovery.version>
+        <maven.packages.skip>false</maven.packages.skip>
+
+        <version.commons-io>2.6</version.commons-io>
+        <version.dnsjava>2.1.7</version.dnsjava>
+        <version.java-jwt>3.3.0</version.java-jwt>
+        <version.service-discovery>3.0.0-SNAPSHOT</version.service-discovery>
     </properties>
 
     <!-- @formatter:off -->
     <repositories>
         <!-- Make artifacts in OSSRH repositories available -->
         <repository>
-            <id>OSSRH-releases</id>
-            <name>central releases</name>
+            <id>ossrh-nexus2-releases</id>
+            <name>ossrh nexus2 releases</name>
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
             <releases><enabled>true</enabled><updatePolicy>never</updatePolicy></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
         <repository>
-            <id>OSSRH-snapshots</id>
-            <name>central snapshots</name>
+            <id>ossrh-nexus2-snapshots</id>
+            <name>ossrh nexus2 snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <releases><enabled>false</enabled></releases>
             <snapshots><enabled>true</enabled><updatePolicy>daily</updatePolicy></snapshots>
